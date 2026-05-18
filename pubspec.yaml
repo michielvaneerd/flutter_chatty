@@ -1,7 +1,7 @@
 name: flutter_chatty
 description: "A Flutter Chat UI package."
 version: 0.0.1
-homepage:
+homepage: https://github.com/michielvaneerd/flutter_chatty
 
 environment:
   sdk: ^3.11.5
