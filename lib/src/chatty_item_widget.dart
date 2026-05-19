@@ -13,11 +13,13 @@ class ChattyItemWidget extends StatelessWidget {
     this.extraWidget,
     this.withDocuments = false,
     this.onDocumentClicked,
+    this.assistantPersona,
   });
   final ChattyItem item;
   final Widget? extraWidget;
   final bool withDocuments;
   final void Function(String)? onDocumentClicked;
+  final Widget? assistantPersona;
 
   static final dateFormat = DateFormat('y-MM-dd');
 
@@ -99,96 +101,107 @@ class ChattyItemWidget extends StatelessWidget {
             ? 0
             : ChattyWidget.paddingBig * 2,
       ),
-      child: Container(
-        padding: EdgeInsets.only(
-          top: ChattyWidget.paddingDefault,
-          left: ChattyWidget.paddingDefault,
-          right: ChattyWidget.paddingDefault,
-          bottom: ChattyWidget.paddingSmall,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(ChattyWidget.borderRadiusDefault),
-            topLeft: Radius.circular(ChattyWidget.borderRadiusDefault),
-            bottomRight: item.source == ChattyItemSource.assistant
-                ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                : Radius.zero,
-            bottomLeft: item.source == ChattyItemSource.user
-                ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                : Radius.zero,
-          ),
-          color: item.source == ChattyItemSource.assistant
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surfaceContainerLowest,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              spacing: ChattyWidget.paddingDefault,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (mainText.isNotEmpty) ChattyRichText(text: mainText),
-                ?getAnswers(context),
-                ?extraWidget,
-                if (withDocuments && item.documents != null)
+      child: Row(
+        spacing: ChattyWidget.paddingSmall,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (item.source == ChattyItemSource.assistant &&
+              assistantPersona != null)
+            assistantPersona!,
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.only(
+                top: ChattyWidget.paddingDefault,
+                left: ChattyWidget.paddingDefault,
+                right: ChattyWidget.paddingDefault,
+                bottom: ChattyWidget.paddingSmall,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(ChattyWidget.borderRadiusDefault),
+                  topLeft: Radius.circular(ChattyWidget.borderRadiusDefault),
+                  bottomRight: item.source == ChattyItemSource.assistant
+                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
+                      : Radius.zero,
+                  bottomLeft: item.source == ChattyItemSource.user
+                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
+                      : Radius.zero,
+                ),
+                color: item.source == ChattyItemSource.assistant
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : Theme.of(context).colorScheme.surfaceContainerLowest,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Column(
+                    spacing: ChattyWidget.paddingDefault,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Sources:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      ...item.documents!.map(
-                        (e) => InkWell(
-                          onTap: onDocumentClicked != null
-                              ? () {
-                                  onDocumentClicked!(e.uri);
-                                }
-                              : null,
-                          child: Text(
-                            e.title,
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
+                      if (mainText.isNotEmpty) ChattyRichText(text: mainText),
+                      ?getAnswers(context),
+                      ?extraWidget,
+                      if (withDocuments && item.documents != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sources:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                          ),
+                            ...item.documents!.map(
+                              (e) => InkWell(
+                                onTap: onDocumentClicked != null
+                                    ? () {
+                                        onDocumentClicked!(e.uri);
+                                      }
+                                    : null,
+                                child: Text(
+                                  e.title,
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                      if (item.error != null)
+                        Row(
+                          spacing: ChattyWidget.paddingDefault,
+                          children: [
+                            Icon(
+                              Icons.warning,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            Flexible(
+                              child: Text(
+                                item.error!,
+                                //style: TextStyle(color: )
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
-                if (item.error != null)
-                  Row(
-                    spacing: ChattyWidget.paddingDefault,
-                    children: [
-                      Icon(
-                        Icons.warning,
-                        color: Theme.of(context).colorScheme.error,
+                  Align(
+                    alignment: AlignmentGeometry.bottomEnd,
+                    child: Text(
+                      DateFormat.Hm().format(item.createdAt),
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
-                      Flexible(
-                        child: Text(
-                          item.error!,
-                          //style: TextStyle(color: )
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-              ],
-            ),
-            Align(
-              alignment: AlignmentGeometry.bottomEnd,
-              child: Text(
-                DateFormat.Hm().format(item.createdAt),
-                style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

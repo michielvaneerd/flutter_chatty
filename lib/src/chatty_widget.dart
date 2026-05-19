@@ -17,6 +17,7 @@ class ChattyWidget extends StatefulWidget {
     this.themeData,
     this.onDocumentClicked,
     this.promptPlaceHolder,
+    this.assistantPersona,
   });
 
   static const paddingDefault = 12.0;
@@ -33,6 +34,9 @@ class ChattyWidget extends StatefulWidget {
   final ThemeData? themeData;
   final void Function(String)? onDocumentClicked;
   final String? promptPlaceHolder;
+
+  /// Assistant persona icon
+  final Widget? assistantPersona;
 
   @override
   State<ChattyWidget> createState() => _ChattyWidgetState();
@@ -85,6 +89,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                       } else {
                         return ChattyItemWidget(
                           item: item,
+                          assistantPersona: widget.assistantPersona,
                           onDocumentClicked: widget.onDocumentClicked,
                           withDocuments: widget.withDocuments,
                           extraWidget: index == 0 && state.busy

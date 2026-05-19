@@ -8,16 +8,23 @@ void main() {
   runApp(MaterialApp(home: const MyApp()));
 }
 
-/// The initialItems can be used for a first assistant message or the previous conversation
-final initialItems = [
-  ChattyItem.fromAssistant('Hi, I am the demo assistant. How can I help you?'),
-];
-
-var messageCounter = 0;
-final now = DateTime.now();
-
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  /// The initialItems can be used for a first assistant message or the previous conversation
+  final initialItems = [
+    ChattyItem.fromAssistant(
+      'Hi, I am the demo assistant. How can I help you?',
+    ),
+  ];
+
+  var messageCounter = 0;
+  final now = DateTime.now();
 
   /// The required callback that receives the user prompt and optionally the answers value.
   /// Here you should implemement your logic, like sending it to the LLM.
@@ -109,6 +116,11 @@ class MyApp extends StatelessWidget {
           initialItems: initialItems,
           withDateSeparator: true,
           withDocuments: true,
+          assistantPersona: Icon(
+            Icons.person_2,
+            size: 32,
+            color: Theme.of(context).colorScheme.inversePrimary,
+          ),
           onDocumentClicked: (p0) {
             showDialog(
               context: context,
