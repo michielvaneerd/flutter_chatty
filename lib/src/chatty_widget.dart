@@ -63,15 +63,12 @@ class _ChattyWidgetState extends State<ChattyWidget> {
           },
           builder: (context, state) {
             final cubit = BlocProvider.of<ChattyWidgetCubit>(context);
-            final currentItemQuestion = state.items.isNotEmpty
-                ? state.items.first.question
-                : null;
-            final textFieldEnabled =
-                !(state.busy ||
-                    (currentItemQuestion != null &&
-                        ChattyItemWidget.hasEmbeddedInput(
-                          currentItemQuestion.type,
-                        )));
+            final currentItemQuestionHasEmbeddedInput =
+                state.items.isNotEmpty &&
+                state.items.first.question != null &&
+                ChattyItemWidget.hasEmbeddedInput(
+                  state.items.first.question!.type,
+                );
             return Column(
               children: [
                 Expanded(
@@ -104,18 +101,20 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 ),
                 SizedBox(height: ChattyWidget.paddingDefault),
                 TextField(
+                  enabled: !currentItemQuestionHasEmbeddedInput,
                   decoration: InputDecoration(
                     hintText: widget.promptPlaceHolder,
                     suffixIcon: IconButton(
-                      onPressed: textFieldEnabled
-                          ? () {
+                      onPressed:
+                          state.busy || currentItemQuestionHasEmbeddedInput
+                          ? null
+                          : () {
                               cubit.prompt(promptController.text);
                               promptController.clear();
-                            }
-                          : null,
+                            },
                       icon: Icon(
                         Icons.arrow_forward_ios,
-                        color: !textFieldEnabled
+                        color: state.busy || currentItemQuestionHasEmbeddedInput
                             ? Theme.of(context).colorScheme.inversePrimary
                             : null,
                       ),
