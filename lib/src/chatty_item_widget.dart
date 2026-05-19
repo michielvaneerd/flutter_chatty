@@ -149,7 +149,9 @@ class ChattyItemWidget extends StatelessWidget {
                       if (mainText.isNotEmpty) ChattyRichText(text: mainText),
                       ?getAnswers(context),
                       ?extraWidget,
-                      if (withDocuments && item.documents != null)
+                      if (withDocuments &&
+                          item.documents != null &&
+                          item.documents!.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
