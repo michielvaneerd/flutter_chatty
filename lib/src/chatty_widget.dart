@@ -18,6 +18,8 @@ class ChattyWidget extends StatefulWidget {
     this.onDocumentClicked,
     this.promptPlaceHolder,
     this.assistantPersona,
+    this.documentsString = 'Sources:',
+    this.enterDateString = 'Enter date',
   });
 
   static const paddingDefault = 12.0;
@@ -30,10 +32,20 @@ class ChattyWidget extends StatefulWidget {
   final Future<ChattyItem> Function(String prompt, {String? value}) onPrompt;
   final List<ChattyItem>? initialItems;
   final bool withDateSeparator;
+
+  /// Whether the documents that are attached to an assistant message should be displayed, for example for a RAG application.
   final bool withDocuments;
   final ThemeData? themeData;
-  final void Function(String)? onDocumentClicked;
+
+  /// Action that should be done when a document is clicked
+  final void Function(ChattyDocument)? onDocumentClicked;
   final String? promptPlaceHolder;
+
+  /// The text for the 'Enter date' button
+  final String enterDateString;
+
+  /// The text for the 'Sources' text
+  final String documentsString;
 
   /// Assistant persona icon
   final Widget? assistantPersona;
@@ -89,6 +101,8 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                       } else {
                         return ChattyItemWidget(
                           item: item,
+                          documentsString: widget.documentsString,
+                          enterDateString: widget.enterDateString,
                           assistantPersona: widget.assistantPersona,
                           onDocumentClicked: widget.onDocumentClicked,
                           withDocuments: widget.withDocuments,

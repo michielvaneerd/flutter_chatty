@@ -112,20 +112,25 @@ class _MyAppState extends State<MyApp> {
       body: SafeArea(
         minimum: EdgeInsets.all(12),
         child: ChattyWidget(
+          // themeData: ThemeData(
+          //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          // ),
           onPrompt: onPrompt,
           initialItems: initialItems,
           withDateSeparator: true,
           withDocuments: true,
+          enterDateString: 'Enter the date!',
+          documentsString: 'SOURCES:',
           assistantPersona: Icon(
             Icons.person_2,
             size: 32,
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
-          onDocumentClicked: (p0) {
+          onDocumentClicked: (doc) {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                content: Text('You clicked on the link: $p0'),
+                content: Text('You clicked on the link: ${doc.uri}'),
                 actions: [
                   FilledButton(
                     onPressed: () {

@@ -14,12 +14,16 @@ class ChattyItemWidget extends StatelessWidget {
     this.withDocuments = false,
     this.onDocumentClicked,
     this.assistantPersona,
+    required this.documentsString,
+    required this.enterDateString,
   });
   final ChattyItem item;
   final Widget? extraWidget;
   final bool withDocuments;
-  final void Function(String)? onDocumentClicked;
+  final void Function(ChattyDocument)? onDocumentClicked;
   final Widget? assistantPersona;
+  final String documentsString;
+  final String enterDateString;
 
   static final dateFormat = DateFormat('y-MM-dd');
 
@@ -63,7 +67,7 @@ class ChattyItemWidget extends StatelessWidget {
                   );
                 }
               },
-              child: Text('Enter date'),
+              child: Text(enterDateString),
             ),
           ],
         );
@@ -150,14 +154,14 @@ class ChattyItemWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Sources:',
+                              documentsString,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             ...item.documents!.map(
                               (e) => InkWell(
                                 onTap: onDocumentClicked != null
                                     ? () {
-                                        onDocumentClicked!(e.uri);
+                                        onDocumentClicked!(e);
                                       }
                                     : null,
                                 child: Text(
