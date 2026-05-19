@@ -100,7 +100,12 @@ class ChattyItemWidget extends StatelessWidget {
             : ChattyWidget.paddingBig,
       ),
       child: Container(
-        padding: EdgeInsets.all(ChattyWidget.paddingDefault),
+        padding: EdgeInsets.only(
+          top: ChattyWidget.paddingDefault,
+          left: ChattyWidget.paddingDefault,
+          right: ChattyWidget.paddingDefault,
+          bottom: ChattyWidget.paddingSmall,
+        ),
         decoration: BoxDecoration(
           border: Border.all(
             color: Theme.of(context).colorScheme.outline,
@@ -121,51 +126,58 @@ class ChattyItemWidget extends StatelessWidget {
               : Theme.of(context).colorScheme.surfaceContainerLowest,
         ),
         child: Column(
-          spacing: ChattyWidget.paddingDefault,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (mainText.isNotEmpty) ChattyRichText(text: mainText),
-            ?getAnswers(context),
-            ?extraWidget,
-            if (withDocuments && item.documents != null)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sources:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  ...item.documents!.map(
-                    (e) => InkWell(
-                      onTap: onDocumentClicked != null
-                          ? () {
-                              onDocumentClicked!(e.uri);
-                            }
-                          : null,
-                      child: Text(
-                        e.title,
-                        style: TextStyle(decoration: TextDecoration.underline),
+            Column(
+              spacing: ChattyWidget.paddingDefault,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (mainText.isNotEmpty) ChattyRichText(text: mainText),
+                ?getAnswers(context),
+                ?extraWidget,
+                if (withDocuments && item.documents != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sources:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
+                      ...item.documents!.map(
+                        (e) => InkWell(
+                          onTap: onDocumentClicked != null
+                              ? () {
+                                  onDocumentClicked!(e.uri);
+                                }
+                              : null,
+                          child: Text(
+                            e.title,
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            if (item.error != null)
-              Row(
-                spacing: ChattyWidget.paddingDefault,
-                children: [
-                  Icon(
-                    Icons.warning,
-                    color: Theme.of(context).colorScheme.error,
+                if (item.error != null)
+                  Row(
+                    spacing: ChattyWidget.paddingDefault,
+                    children: [
+                      Icon(
+                        Icons.warning,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      Flexible(
+                        child: Text(
+                          item.error!,
+                          //style: TextStyle(color: )
+                        ),
+                      ),
+                    ],
                   ),
-                  Flexible(
-                    child: Text(
-                      item.error!,
-                      //style: TextStyle(color: )
-                    ),
-                  ),
-                ],
-              ),
+              ],
+            ),
             Align(
               alignment: AlignmentGeometry.bottomEnd,
               child: Text(
