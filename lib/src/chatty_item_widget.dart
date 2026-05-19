@@ -94,10 +94,10 @@ class ChattyItemWidget extends StatelessWidget {
       padding: EdgeInsets.only(
         left: item.source == ChattyItemSource.assistant
             ? 0
-            : ChattyWidget.paddingBig,
+            : ChattyWidget.paddingBig * 2,
         right: item.source == ChattyItemSource.user
             ? 0
-            : ChattyWidget.paddingBig,
+            : ChattyWidget.paddingBig * 2,
       ),
       child: Container(
         padding: EdgeInsets.only(

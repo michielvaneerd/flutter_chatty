@@ -76,7 +76,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                     reverse: true,
                     itemCount: state.items.length,
                     separatorBuilder: (context, index) {
-                      return SizedBox(height: ChattyWidget.paddingDefault);
+                      return SizedBox(height: ChattyWidget.paddingBig);
                     },
                     itemBuilder: (context, index) {
                       final item = state.items[index];
