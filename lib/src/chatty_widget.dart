@@ -6,6 +6,35 @@ import 'package:flutter_chatty/src/chatty_item_widget.dart';
 import 'package:flutter_chatty/src/chatty_widget_cubit.dart';
 import 'package:flutter_chatty/src/models.dart';
 
+class ChattyWidgetStyle {
+  final TextStyle? userTextStyle;
+  final TextStyle? assistantTextStyle;
+  final TextStyle? documentsStringStyle;
+  final TextStyle? documentsLinkStyle;
+  final TextStyle? timeStyle;
+  final TextStyle? dateStyle;
+  final BoxDecoration? dateBoxDecoration;
+  final EdgeInsets? datePadding;
+  final BoxDecoration? userBoxDecoration;
+  final BoxDecoration? assistantBoxDecoration;
+  final EdgeInsets? userPadding;
+  final EdgeInsets? assistantPadding;
+  const ChattyWidgetStyle({
+    this.userTextStyle,
+    this.assistantTextStyle,
+    this.documentsLinkStyle,
+    this.documentsStringStyle,
+    this.timeStyle,
+    this.dateStyle,
+    this.dateBoxDecoration,
+    this.datePadding,
+    this.userBoxDecoration,
+    this.assistantBoxDecoration,
+    this.userPadding,
+    this.assistantPadding,
+  });
+}
+
 /// ChattyWidget is the main widget that contains the chat items and the textfield for the prompt.
 class ChattyWidget extends StatefulWidget {
   const ChattyWidget({
@@ -20,6 +49,7 @@ class ChattyWidget extends StatefulWidget {
     this.assistantPersona,
     this.documentsString = 'Sources:',
     this.enterDateString = 'Enter date',
+    this.style = const ChattyWidgetStyle(),
   });
 
   static const paddingDefault = 12.0;
@@ -32,6 +62,7 @@ class ChattyWidget extends StatefulWidget {
   final Future<ChattyItem> Function(String prompt, {String? value}) onPrompt;
   final List<ChattyItem>? initialItems;
   final bool withDateSeparator;
+  final ChattyWidgetStyle style;
 
   /// Whether the documents that are attached to an assistant message should be displayed, for example for a RAG application.
   final bool withDocuments;
@@ -97,10 +128,14 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                     itemBuilder: (context, index) {
                       final item = state.items[index];
                       if (item.source == ChattyItemSource.dateSeparator) {
-                        return ChattyDateSeparator(date: item.createdAt);
+                        return ChattyDateSeparator(
+                          date: item.createdAt,
+                          style: widget.style,
+                        );
                       } else {
                         return ChattyItemWidget(
                           item: item,
+                          style: widget.style,
                           documentsString: widget.documentsString,
                           enterDateString: widget.enterDateString,
                           assistantPersona: widget.assistantPersona,

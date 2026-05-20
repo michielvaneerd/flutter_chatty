@@ -16,6 +16,7 @@ class ChattyItemWidget extends StatelessWidget {
     this.assistantPersona,
     required this.documentsString,
     required this.enterDateString,
+    this.style = const ChattyWidgetStyle(),
   });
   final ChattyItem item;
   final Widget? extraWidget;
@@ -24,6 +25,7 @@ class ChattyItemWidget extends StatelessWidget {
   final Widget? assistantPersona;
   final String documentsString;
   final String enterDateString;
+  final ChattyWidgetStyle style;
 
   static final dateFormat = DateFormat('y-MM-dd');
 
@@ -96,49 +98,56 @@ class ChattyItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mainText = item.content;
+    final isAssistant = item.source == ChattyItemSource.assistant;
+    final boxDecoration = isAssistant
+        ? style.assistantBoxDecoration
+        : style.userBoxDecoration;
+    final padding = isAssistant ? style.assistantPadding : style.userPadding;
     return Padding(
       padding: EdgeInsets.only(
-        left: item.source == ChattyItemSource.assistant
-            ? 0
-            : ChattyWidget.paddingBig * 2,
-        right: item.source == ChattyItemSource.user
-            ? 0
-            : ChattyWidget.paddingBig * 2,
+        left: isAssistant ? 0 : ChattyWidget.paddingBig * 2,
+        right: !isAssistant ? 0 : ChattyWidget.paddingBig * 2,
       ),
       child: Row(
         spacing: ChattyWidget.paddingSmall,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (item.source == ChattyItemSource.assistant &&
-              assistantPersona != null)
-            assistantPersona!,
+          if (isAssistant && assistantPersona != null) assistantPersona!,
           Expanded(
             child: Container(
-              padding: EdgeInsets.only(
-                top: ChattyWidget.paddingDefault,
-                left: ChattyWidget.paddingDefault,
-                right: ChattyWidget.paddingDefault,
-                bottom: ChattyWidget.paddingSmall,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(ChattyWidget.borderRadiusDefault),
-                  topLeft: Radius.circular(ChattyWidget.borderRadiusDefault),
-                  bottomRight: item.source == ChattyItemSource.assistant
-                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                      : Radius.zero,
-                  bottomLeft: item.source == ChattyItemSource.user
-                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                      : Radius.zero,
-                ),
-                color: item.source == ChattyItemSource.assistant
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.surfaceContainerLowest,
-              ),
+              padding:
+                  padding ??
+                  EdgeInsets.only(
+                    top: ChattyWidget.paddingDefault,
+                    left: ChattyWidget.paddingDefault,
+                    right: ChattyWidget.paddingDefault,
+                    bottom: ChattyWidget.paddingSmall,
+                  ),
+              decoration:
+                  boxDecoration ??
+                  BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(
+                        ChattyWidget.borderRadiusDefault,
+                      ),
+                      topLeft: Radius.circular(
+                        ChattyWidget.borderRadiusDefault,
+                      ),
+                      bottomRight: isAssistant
+                          ? Radius.circular(ChattyWidget.borderRadiusDefault)
+                          : Radius.zero,
+                      bottomLeft: !isAssistant
+                          ? Radius.circular(ChattyWidget.borderRadiusDefault)
+                          : Radius.zero,
+                    ),
+                    color: isAssistant
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Theme.of(context).colorScheme.surfaceContainerLowest,
+                  ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -146,7 +155,13 @@ class ChattyItemWidget extends StatelessWidget {
                     spacing: ChattyWidget.paddingDefault,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (mainText.isNotEmpty) ChattyRichText(text: mainText),
+                      if (mainText.isNotEmpty)
+                        ChattyRichText(
+                          text: mainText,
+                          textStyle: isAssistant
+                              ? style.assistantTextStyle
+                              : style.userTextStyle,
+                        ),
                       ?getAnswers(context),
                       ?extraWidget,
                       if (withDocuments &&
@@ -157,7 +172,10 @@ class ChattyItemWidget extends StatelessWidget {
                           children: [
                             Text(
                               documentsString,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  style.documentsStringStyle ??
+                                  (style.assistantTextStyle ?? TextStyle())
+                                      .copyWith(fontWeight: FontWeight.bold),
                             ),
                             ...item.documents!.map(
                               (e) => InkWell(
@@ -168,9 +186,13 @@ class ChattyItemWidget extends StatelessWidget {
                                     : null,
                                 child: Text(
                                   e.title,
-                                  style: TextStyle(
-                                    decoration: TextDecoration.underline,
-                                  ),
+                                  style:
+                                      style.documentsLinkStyle ??
+                                      (style.assistantTextStyle ?? TextStyle())
+                                          .copyWith(
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
                                 ),
                               ),
                             ),
@@ -198,9 +220,14 @@ class ChattyItemWidget extends StatelessWidget {
                     alignment: AlignmentGeometry.bottomEnd,
                     child: Text(
                       DateFormat.Hm().format(item.createdAt),
-                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
+                      style:
+                          style.timeStyle ??
+                          (style.assistantTextStyle ?? TextStyle()).copyWith(
+                            fontSize: Theme.of(
+                              context,
+                            ).textTheme.labelSmall!.fontSize,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
                     ),
                   ),
                 ],
