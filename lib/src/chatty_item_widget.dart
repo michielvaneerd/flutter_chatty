@@ -144,6 +144,16 @@ class ChattyItemWidget extends StatelessWidget {
                           ? Radius.circular(ChattyWidget.borderRadiusDefault)
                           : Radius.zero,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withAlpha(80),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
                     color: isAssistant
                         ? Theme.of(context).colorScheme.primaryContainer
                         : Theme.of(context).colorScheme.surfaceContainerLowest,

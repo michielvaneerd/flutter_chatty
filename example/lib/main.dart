@@ -113,23 +113,23 @@ class _MyAppState extends State<MyApp> {
         minimum: EdgeInsets.all(12),
 
         child: ChattyWidget(
-          style: ChattyWidgetStyle(
-            assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
-            userTextStyle: Theme.of(context).textTheme.bodyMedium,
-            timeStyle: Theme.of(
-              context,
-            ).textTheme.bodySmall!.copyWith(color: Colors.blue),
-            dateStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
-              color: Colors.yellow,
-              fontWeight: FontWeight.bold,
-            ),
-            datePadding: EdgeInsets.all(20),
-            dateBoxDecoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.brown,
-            ),
-          ),
+          // style: ChattyWidgetStyle(
+          //   assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
+          //   userTextStyle: Theme.of(context).textTheme.bodyMedium,
+          //   timeStyle: Theme.of(
+          //     context,
+          //   ).textTheme.bodySmall!.copyWith(color: Colors.blue),
+          //   dateStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+          //     color: Colors.yellow,
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          //   datePadding: EdgeInsets.all(20),
+          //   dateBoxDecoration: BoxDecoration(
+          //     border: Border.all(color: Colors.black),
+          //     borderRadius: BorderRadius.circular(20),
+          //     color: Colors.brown,
+          //   ),
+          // ),
           // themeData: ThemeData(
           //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
           // ),
