@@ -15,8 +15,8 @@ class ChattyWidgetStyle {
   final TextStyle? dateStyle;
   final BoxDecoration? dateBoxDecoration;
   final EdgeInsets? datePadding;
-  final BoxDecoration? userBoxDecoration;
-  final BoxDecoration? assistantBoxDecoration;
+  final Color? userColor;
+  final Color? assistantColor;
   final EdgeInsets? userPadding;
   final EdgeInsets? assistantPadding;
   const ChattyWidgetStyle({
@@ -28,8 +28,8 @@ class ChattyWidgetStyle {
     this.dateStyle,
     this.dateBoxDecoration,
     this.datePadding,
-    this.userBoxDecoration,
-    this.assistantBoxDecoration,
+    this.userColor,
+    this.assistantColor,
     this.userPadding,
     this.assistantPadding,
   });

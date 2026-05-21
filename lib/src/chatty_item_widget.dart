@@ -6,6 +6,47 @@ import 'package:flutter_chatty/src/chatty_widget_cubit.dart';
 import 'package:flutter_chatty/src/models.dart';
 import 'package:intl/intl.dart';
 
+class _BubbleTail extends StatelessWidget {
+  const _BubbleTail({required this.color, required this.isAssistant});
+  final Color color;
+  final bool isAssistant;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: const Size(8, 12),
+      painter: _TailPainter(color: color, isAssistant: isAssistant),
+    );
+  }
+}
+
+class _TailPainter extends CustomPainter {
+  const _TailPainter({required this.color, required this.isAssistant});
+  final Color color;
+  final bool isAssistant;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Fill
+    final paint = Paint()..color = color;
+    final path = Path();
+    if (isAssistant) {
+      path.moveTo(size.width, 0);
+      path.lineTo(0, size.height); // tip at bottom-left
+      path.lineTo(size.width, size.height); // horizontal bottom back to base
+    } else {
+      path.moveTo(0, 0);
+      path.lineTo(size.width, size.height); // tip at bottom-right
+      path.lineTo(0, size.height); // horizontal bottom back to base
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TailPainter old) => old.color != color;
+}
+
 class ChattyItemWidget extends StatelessWidget {
   const ChattyItemWidget({
     super.key,
@@ -99,20 +140,23 @@ class ChattyItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final mainText = item.content;
     final isAssistant = item.source == ChattyItemSource.assistant;
-    final boxDecoration = isAssistant
-        ? style.assistantBoxDecoration
-        : style.userBoxDecoration;
     final padding = isAssistant ? style.assistantPadding : style.userPadding;
+    final userColor =
+        style.userColor ?? Theme.of(context).colorScheme.surfaceContainerLowest;
+    final assistantColor =
+        style.assistantColor ?? Theme.of(context).colorScheme.primaryContainer;
     return Padding(
       padding: EdgeInsets.only(
         left: isAssistant ? 0 : ChattyWidget.paddingBig * 2,
         right: !isAssistant ? 0 : ChattyWidget.paddingBig * 2,
       ),
       child: Row(
-        spacing: ChattyWidget.paddingSmall,
+        //spacing: ChattyWidget.paddingSmall,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (isAssistant && assistantPersona != null) assistantPersona!,
+          if (isAssistant)
+            _BubbleTail(color: assistantColor, isAssistant: isAssistant),
           Expanded(
             child: Container(
               padding:
@@ -123,41 +167,19 @@ class ChattyItemWidget extends StatelessWidget {
                     right: ChattyWidget.paddingDefault,
                     bottom: ChattyWidget.paddingSmall,
                   ),
-              decoration:
-                  boxDecoration ??
-                  BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(
-                        ChattyWidget.borderRadiusDefault,
-                      ),
-                      topLeft: Radius.circular(
-                        ChattyWidget.borderRadiusDefault,
-                      ),
-                      bottomRight: isAssistant
-                          ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                          : Radius.zero,
-                      bottomLeft: !isAssistant
-                          ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                          : Radius.zero,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withAlpha(80),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: Offset(0, 1),
-                      ),
-                    ],
-                    color: isAssistant
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : Theme.of(context).colorScheme.surfaceContainerLowest,
-                  ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(ChattyWidget.borderRadiusDefault),
+                  topLeft: Radius.circular(ChattyWidget.borderRadiusDefault),
+                  bottomRight: isAssistant
+                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
+                      : Radius.zero,
+                  bottomLeft: !isAssistant
+                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
+                      : Radius.zero,
+                ),
+                color: isAssistant ? assistantColor : userColor,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -244,6 +266,8 @@ class ChattyItemWidget extends StatelessWidget {
               ),
             ),
           ),
+          if (!isAssistant)
+            _BubbleTail(color: userColor, isAssistant: isAssistant),
         ],
       ),
     );
