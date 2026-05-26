@@ -29,12 +29,14 @@ class ChattyAnswer extends Equatable {
 }
 
 class ChattyQuestion extends Equatable {
+  final String name;
   final ChattyQuestionType type;
   final String? min;
   final String? max;
   final List<ChattyAnswer>? answers;
 
   const ChattyQuestion({
+    required this.name,
     required this.type,
     this.min,
     this.max,
@@ -42,7 +44,7 @@ class ChattyQuestion extends Equatable {
   }); // Only of type is singleChoice
 
   @override
-  List<Object?> get props => [type, min, max, answers];
+  List<Object?> get props => [name, type, min, max, answers];
 }
 
 class ChattyItem extends Equatable {

@@ -83,7 +83,12 @@ class ChattyWidget extends StatefulWidget {
 
   /// Required callback that is called when the user enters a new prompt and optionaly a value of an answer.
   /// This is the place to send this prompt to the LLM and returns the response as a ChattyItem.
-  final Future<ChattyItem> Function(String prompt, {String? value}) onPrompt;
+  final Future<ChattyItem> Function(
+    String prompt, {
+    String? questionName,
+    String? answerValue,
+  })
+  onPrompt;
 
   /// Optional initial ChattyItems, for example to display a first assistant message or the history of a conversation.
   final List<ChattyItem>? initialItems;

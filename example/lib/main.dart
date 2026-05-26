@@ -39,10 +39,20 @@ class _MyAppState extends State<MyApp> {
   /// Here you should implemement your logic, like sending it to the LLM.
   /// The response of this action should be converted to a ChattyItem instance and returned back.
   /// This implementation displays different scenario's, like normale responses, handling questions and errors.
-  Future<ChattyItem> onPrompt(String prompt, {String? value}) async {
+  Future<ChattyItem> onPrompt(
+    String prompt, {
+    String? questionName,
+    String? answerValue,
+  }) async {
     await Future.delayed(Duration(milliseconds: Random().nextInt(2000)));
 
     messageCounter += 1;
+
+    if (questionName != null) {
+      print(
+        'Received answer for question $questionName: answer = $prompt and value = $answerValue',
+      );
+    }
 
     switch (messageCounter) {
       case 1:
@@ -50,7 +60,7 @@ class _MyAppState extends State<MyApp> {
         /// Question with input from the prompt textfield
         return ChattyItem.fromAssistant(
           'What\'s your name?',
-          question: ChattyQuestion(type: ChattyQuestionType.text),
+          question: ChattyQuestion(name: 'name', type: ChattyQuestionType.text),
         );
       case 2:
 
@@ -58,6 +68,7 @@ class _MyAppState extends State<MyApp> {
         return ChattyItem.fromAssistant(
           'Nice to meat you $prompt! What is your birthdate?',
           question: ChattyQuestion(
+            name: 'birthdate',
             type: ChattyQuestionType.date,
             min: DateFormat('y-MM-dd').format(DateTime(now.year - 100)),
           ),
@@ -68,6 +79,7 @@ class _MyAppState extends State<MyApp> {
         return ChattyItem.fromAssistant(
           'Yes or no?',
           question: ChattyQuestion(
+            name: 'yes_no',
             type: ChattyQuestionType.singleChoice,
             answers: [
               ChattyAnswer(value: 'yes', content: 'Yes'),
@@ -82,6 +94,7 @@ class _MyAppState extends State<MyApp> {
           'Yes or no?',
           error: 'Sorry, $prompt is a wrong :-(',
           question: ChattyQuestion(
+            name: 'yes_no',
             type: ChattyQuestionType.singleChoice,
             answers: [
               ChattyAnswer(value: 'yes', content: 'Yes'),

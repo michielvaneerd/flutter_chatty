@@ -41,7 +41,15 @@ class ChattyWidgetCubit extends Cubit<ChattyWidgetState> {
            items: _getFullItems(initialItems ?? [], withDateSeparator),
          ),
        );
-  final Future<ChattyItem> Function(String content, {String? value}) onPrompt;
+
+  /// Function that is called for each new user prompt. If this is an answer to a question,
+  /// the name contains the question name and the value contains the optional answer value (only for single choice questions).
+  final Future<ChattyItem> Function(
+    String content, {
+    String? questionName,
+    String? answerValue,
+  })
+  onPrompt;
   final List<ChattyItem>? initialItems;
   final bool withDateSeparator;
 
@@ -72,28 +80,21 @@ class ChattyWidgetCubit extends Cubit<ChattyWidgetState> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? value}) async {
-    // First make copy of current items without date separators
-    // List<ChattyItem> newItems = state.items
-    //     .where((e) => e.source != ChattyItemSource.dateSeparator)
-    //     .toList();
-
     List<ChattyItem> newItems = List<ChattyItem>.from(state.items);
+
+    String? questionName;
 
     if (state.items.isNotEmpty && state.items.first.question != null) {
       // This is an answer to this question. We remove the question from this item,
       // so then it will be a normal assistant message without answering options anymore.
+      questionName = state.items.first.question!.name;
       newItems[0] = newItems.first.copyWith(removeQuestion: true);
     }
 
     // Add the user answer to the items
     newItems.insert(0, ChattyItem.fromUser(prompt));
 
-    emit(
-      state.copyWith(
-        //busy: true,
-        items: _getFullItems(newItems, withDateSeparator),
-      ),
-    );
+    emit(state.copyWith(items: _getFullItems(newItems, withDateSeparator)));
 
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
@@ -110,7 +111,11 @@ class ChattyWidgetCubit extends Cubit<ChattyWidgetState> {
       ),
     );
 
-    final response = await onPrompt(prompt, value: value);
+    final response = await onPrompt(
+      prompt,
+      questionName: questionName,
+      answerValue: value,
+    );
     emit(
       state.copyWith(
         items: List.from(state.items)
