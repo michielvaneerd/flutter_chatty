@@ -19,7 +19,16 @@ class _MyAppState extends State<MyApp> {
   /// The initialItems can be used for a first assistant message or the previous conversation
   final initialItems = [
     ChattyItem.fromAssistant(
+      'I can show a demo of the Flutter Chatty library',
+      createdAt: DateTime.now().subtract(Duration(minutes: 3)),
+    ),
+    ChattyItem.fromUser(
+      'What can you do?',
+      createdAt: DateTime.now().subtract(Duration(minutes: 4)),
+    ),
+    ChattyItem.fromAssistant(
       'Hi, I am the demo assistant. How can I help you?',
+      createdAt: DateTime.now().subtract(Duration(minutes: 5)),
     ),
   ];
 
@@ -116,7 +125,7 @@ class _MyAppState extends State<MyApp> {
           style: ChattyWidgetStyle(
             userColor: Colors.limeAccent,
             assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
-            userTextStyle: Theme.of(context).textTheme.bodyMedium,
+            userTextStyle: Theme.of(context).textTheme.bodyLarge,
             timeStyle: Theme.of(
               context,
             ).textTheme.bodySmall!.copyWith(color: Colors.blue),

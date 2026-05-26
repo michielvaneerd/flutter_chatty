@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chatty/src/chatty_helpers.dart';
@@ -85,6 +87,15 @@ class ChattyWidgetCubit extends Cubit<ChattyWidgetState> {
 
     // Add the user answer to the items
     newItems.insert(0, ChattyItem.fromUser(prompt));
+
+    emit(
+      state.copyWith(
+        //busy: true,
+        items: _getFullItems(newItems, withDateSeparator),
+      ),
+    );
+
+    await Future.delayed(Duration(milliseconds: Random().nextInt(600)));
 
     // Add the "thinking" assistant message
     newItems.insert(
