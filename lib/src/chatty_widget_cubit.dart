@@ -95,7 +95,7 @@ class ChattyWidgetCubit extends Cubit<ChattyWidgetState> {
       ),
     );
 
-    await Future.delayed(Duration(milliseconds: Random().nextInt(600)));
+    await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
     // Add the "thinking" assistant message
     newItems.insert(
