@@ -137,6 +137,8 @@ class _MyAppState extends State<MyApp> {
         child: ChattyWidget(
           style: ChattyWidgetStyle(
             userColor: Colors.limeAccent,
+            userBorderColor: Colors.black,
+            assistantBorderColor: Colors.deepPurple,
             assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
             userTextStyle: Theme.of(context).textTheme.bodyLarge,
             timeStyle: Theme.of(
@@ -147,7 +149,7 @@ class _MyAppState extends State<MyApp> {
               fontWeight: FontWeight.bold,
             ),
             borderWidth: 1.0,
-            datePadding: EdgeInsets.all(20),
+            datePadding: EdgeInsets.all(10),
             dateBoxDecoration: BoxDecoration(
               border: Border.all(color: Colors.black),
               borderRadius: BorderRadius.circular(20),
@@ -165,7 +167,7 @@ class _MyAppState extends State<MyApp> {
           documentsString: 'SOURCES:',
           assistantPersona: Icon(
             Icons.person_2,
-            size: 32,
+            size: 40,
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
           onDocumentClicked: (doc) {

@@ -35,7 +35,14 @@ class ChattyWidgetStyle {
   /// Padding for the user prompts
   final EdgeInsets? userPadding;
 
+  /// Is not null, a border is painted around the message bubbles.
   final double? borderWidth;
+
+  /// Order color for user prompts
+  final Color? userBorderColor;
+
+  /// Border color for assistant responses
+  final Color? assistantBorderColor;
 
   /// Padding for the assistant responses
   final EdgeInsets? assistantPadding;
@@ -53,5 +60,7 @@ class ChattyWidgetStyle {
     this.assistantColor,
     this.userPadding,
     this.assistantPadding,
+    this.userBorderColor,
+    this.assistantBorderColor,
   });
 }

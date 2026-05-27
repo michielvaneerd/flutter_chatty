@@ -186,6 +186,11 @@ class ChattyItemWidget extends StatelessWidget {
         style.userColor ?? Theme.of(context).colorScheme.surfaceContainerLowest;
     final assistantColor =
         style.assistantColor ?? Theme.of(context).colorScheme.primaryContainer;
+    final userBorderColor =
+        style.userBorderColor ?? Theme.of(context).colorScheme.outlineVariant;
+    final assistantBorderColor =
+        style.assistantBorderColor ??
+        Theme.of(context).colorScheme.outlineVariant;
     return Padding(
       padding: EdgeInsets.only(
         left: isAssistant ? 0 : ChattyWidget.paddingBig * 2,
@@ -234,9 +239,9 @@ class ChattyItemWidget extends StatelessWidget {
                           border: style.borderWidth != null
                               ? Border.all(
                                   width: style.borderWidth!,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.outlineVariant,
+                                  color: isAssistant
+                                      ? assistantBorderColor
+                                      : userBorderColor,
                                 )
                               : null,
                         ),
@@ -348,7 +353,9 @@ class ChattyItemWidget extends StatelessWidget {
                     child: _BubbleTail(
                       color: assistantColor,
                       isAssistant: isAssistant,
-                      borderColor: Theme.of(context).colorScheme.outlineVariant,
+                      borderColor: isAssistant
+                          ? assistantBorderColor
+                          : userBorderColor,
                       borderWidth: style.borderWidth,
                     ),
                   ),
@@ -361,7 +368,9 @@ class ChattyItemWidget extends StatelessWidget {
                     child: _BubbleTail(
                       color: userColor,
                       isAssistant: isAssistant,
-                      borderColor: Theme.of(context).colorScheme.outlineVariant,
+                      borderColor: isAssistant
+                          ? assistantBorderColor
+                          : userBorderColor,
                       borderWidth: style.borderWidth,
                     ),
                   ),
