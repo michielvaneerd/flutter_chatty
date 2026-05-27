@@ -8,14 +8,28 @@ import 'package:flutter_chatty/src/chatty_item_widget.dart';
 import 'package:flutter_chatty/src/chatty_widget_style.dart';
 import 'package:flutter_chatty/src/models.dart';
 
+/// Controller that handles all actions on the items.
+class ChattyWidgetController {
+  ChattyWidgetController({List<ChattyItem>? items})
+    : _items = ValueNotifier<List<ChattyItem>>(items ?? []);
+  final ValueNotifier<List<ChattyItem>>
+  _items; // Clean list without extra items, like dateSeparator.
+  void setItems(List<ChattyItem> items) {
+    _items.value = items;
+  }
+
+  List<ChattyItem> getItems() {
+    return _items.value;
+  }
+}
+
 /// ChattyWidget is the main widget that contains the ChattyItemWidget items and the textfield for the prompt
 class ChattyWidget extends StatefulWidget {
   const ChattyWidget({
     super.key,
     required this.onPrompt,
-    this.initialItems,
-    this.withDateSeparator = false,
     this.withDocuments = false,
+    this.withDateSeparator = false,
     this.themeData,
     this.onDocumentClicked,
     this.promptPlaceHolder,
@@ -23,12 +37,15 @@ class ChattyWidget extends StatefulWidget {
     this.documentsString = 'Sources:',
     this.enterDateString = 'Enter date',
     this.style = const ChattyWidgetStyle(),
+    this.controller,
   });
 
   static const paddingDefault = 12.0;
   static const paddingSmall = 6.0;
   static const paddingBig = 24.0;
   static const borderRadiusDefault = 18.0;
+
+  final ChattyWidgetController? controller;
 
   /// Required callback that is called when the user enters a new prompt and optionaly a value of an answer.
   /// This is the place to send this prompt to the LLM and returns the response as a ChattyItem.
@@ -39,10 +56,6 @@ class ChattyWidget extends StatefulWidget {
   })
   onPrompt;
 
-  /// Optional initial ChattyItems, for example to display a first assistant message or the history of a conversation.
-  final List<ChattyItem>? initialItems;
-
-  /// Whether to display the date separator widget.
   final bool withDateSeparator;
 
   /// The style for this ChattyWidget and ChattyItemWidget items.
@@ -78,12 +91,17 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   final _listKey = GlobalKey<AnimatedListState>();
   var _previousItemCount = 0;
   var _busy = false;
-  late List<ChattyItem> _items;
+  late final ChattyWidgetController _controller;
 
   @override
   void initState() {
-    _items = _getFullItems(widget.initialItems ?? []);
-    _previousItemCount = _items.length;
+    if (widget.controller == null) {
+      _controller = ChattyWidgetController();
+    } else {
+      _controller = widget
+          .controller!; // This one can have some initialItems and withDateSeparator
+    }
+    _previousItemCount = getFullItems().length;
     super.initState();
   }
 
@@ -93,27 +111,15 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     super.dispose();
   }
 
-  void setStateFull({bool busy = false, required List<ChattyItem> newItems}) {
-    final diff = newItems.length - _previousItemCount;
-    for (int i = 0; i < diff; i++) {
-      _listKey.currentState?.insertItem(i);
-    }
-    _previousItemCount = newItems.length;
-    setState(() {
-      _busy = busy;
-      _items = newItems;
-    });
-  }
-
-  List<ChattyItem> _getFullItems(List<ChattyItem> items) {
+  List<ChattyItem> getFullItems() {
     if (!widget.withDateSeparator) {
-      return items;
+      return _controller.getItems();
     }
     // Items has the most recent item at index 0
     // So instead of ADDING the date separator to the END of the list BEFORE the first message with a new date
     final List<ChattyItem> newItems = [];
     final Map<DateTime, bool> dates = {};
-    for (final item in items.reversed) {
+    for (final item in _controller.getItems().reversed) {
       // We reverse the list, so now the oldest entry is at index 0
       final date = ChattyHelpers.getDate(item.createdAt);
       if (!dates.containsKey(date)) {
@@ -127,23 +133,35 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     return newItems.reversed.toList();
   }
 
+  /// Set the state.
+  /// @param newItems: the full items (including optional dateSeparator)
+  void setStateFull({bool busy = false, required fullItemListCount}) {
+    final diff = fullItemListCount - _previousItemCount;
+    for (int i = 0; i < diff; i++) {
+      _listKey.currentState?.insertItem(i);
+    }
+    _previousItemCount = fullItemListCount;
+    setState(() {
+      _busy = busy;
+    });
+  }
+
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
-    List<ChattyItem> newItems = List<ChattyItem>.from(_items);
+    List<ChattyItem> newItems = List<ChattyItem>.from(_controller.getItems());
 
     String? questionName;
 
-    if (_items.isNotEmpty && _items.first.question != null) {
+    if (newItems.isNotEmpty && newItems.first.question != null) {
       // This is an answer to this question. We remove the question from this item,
       // so then it will be a normal assistant message without answering options anymore.
-      questionName = _items.first.question!.name;
+      questionName = newItems.first.question!.name;
       newItems[0] = newItems.first.copyWith(removeQuestion: true);
     }
 
     // Add the user answer to the items
     newItems.insert(0, ChattyItem.fromUser(prompt));
-
-    setStateFull(newItems: _getFullItems(newItems));
+    _controller.setItems(newItems);
 
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
@@ -152,8 +170,11 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       0,
       ChattyItem.fromAssistant(''),
     ); // Empty assistant message is thinking
+    _controller.setItems(List<ChattyItem>.from(newItems));
 
-    setStateFull(busy: true, newItems: _getFullItems(newItems));
+    setState(() {
+      _busy = true;
+    });
 
     final response = await widget.onPrompt(
       prompt,
@@ -161,97 +182,119 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       answerValue: answerValue,
     );
 
-    setStateFull(
-      newItems: List.from(_items)
-        ..removeAt(0) // Remove the thinking assistant message first
-        ..insert(0, response), // Then add the response assistant message);
+    _controller.setItems(
+      List<ChattyItem>.from(
+        newItems
+          ..removeAt(0)
+          ..insert(0, response),
+      ),
     );
+
+    setState(() {
+      _busy = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentItemQuestionHasEmbeddedInput =
-        _items.isNotEmpty &&
-        _items.first.question != null &&
-        ChattyItemWidget.hasEmbeddedInput(_items.first.question!.type);
     return Theme(
       data: widget.themeData ?? Theme.of(context),
-      child: Column(
-        children: [
-          Expanded(
-            child: AnimatedList(
-              key: _listKey,
-              reverse: true,
-              initialItemCount: _previousItemCount,
-              itemBuilder: (context, index, animation) {
-                if (index >= _items.length) {
-                  return const SizedBox.shrink();
-                }
-                final item = _items[index];
-                final Widget child;
-                if (item.source == ChattyItemSource.dateSeparator) {
-                  child = ChattyDateSeparator(
-                    date: item.createdAt,
-                    style: widget.style,
-                  );
-                } else {
-                  child = ChattyItemWidget(
-                    item: item,
-                    style: widget.style,
-                    onPrompt: prompt,
-                    documentsString: widget.documentsString,
-                    enterDateString: widget.enterDateString,
-                    assistantPersona: widget.assistantPersona,
-                    onDocumentClicked: widget.onDocumentClicked,
-                    withDocuments: widget.withDocuments,
-                    extraWidget: index == 0 && _busy
-                        ? ChattyAnimatedDots(
-                            textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          )
-                        : null,
-                  );
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(top: ChattyWidget.paddingBig),
-                  child: FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeIn,
+      child: ValueListenableBuilder(
+        valueListenable: _controller._items,
+        builder: (context, value, child) {
+          final fullItems = getFullItems();
+          final currentItemQuestionHasEmbeddedInput =
+              fullItems.isNotEmpty &&
+              fullItems.first.question != null &&
+              ChattyItemWidget.hasEmbeddedInput(fullItems.first.question!.type);
+          // Don't think this is ok...
+          final diff = fullItems.length - _previousItemCount;
+          for (int i = 0; i < diff; i++) {
+            _listKey.currentState?.insertItem(i);
+          }
+          _previousItemCount = fullItems.length;
+          return Column(
+            children: [
+              Expanded(
+                child: AnimatedList(
+                  key: _listKey,
+                  reverse: true,
+                  initialItemCount: _previousItemCount,
+                  itemBuilder: (context, index, animation) {
+                    if (index >= fullItems.length) {
+                      return const SizedBox.shrink();
+                    }
+                    final item = fullItems[index];
+                    final Widget child;
+                    if (item.source == ChattyItemSource.dateSeparator) {
+                      child = ChattyDateSeparator(
+                        date: item.createdAt,
+                        style: widget.style,
+                      );
+                    } else {
+                      child = ChattyItemWidget(
+                        item: item,
+                        style: widget.style,
+                        onPrompt: prompt,
+                        documentsString: widget.documentsString,
+                        enterDateString: widget.enterDateString,
+                        assistantPersona: widget.assistantPersona,
+                        onDocumentClicked: widget.onDocumentClicked,
+                        withDocuments: widget.withDocuments,
+                        extraWidget: index == 0 && _busy
+                            ? ChattyAnimatedDots(
+                                textStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : null,
+                      );
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: ChattyWidget.paddingBig,
+                      ),
+                      child: FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeIn,
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: ChattyWidget.paddingDefault),
+              TextField(
+                enabled: !currentItemQuestionHasEmbeddedInput,
+                decoration: InputDecoration(
+                  hintText: widget.promptPlaceHolder,
+                  suffixIcon: IconButton(
+                    onPressed: _busy || currentItemQuestionHasEmbeddedInput
+                        ? null
+                        : () {
+                            prompt(promptController.text);
+                            promptController.clear();
+                          },
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      color: _busy || currentItemQuestionHasEmbeddedInput
+                          ? Theme.of(context).colorScheme.inversePrimary
+                          : null,
                     ),
-                    child: child,
                   ),
-                );
-              },
-            ),
-          ),
-          SizedBox(height: ChattyWidget.paddingDefault),
-          TextField(
-            enabled: !currentItemQuestionHasEmbeddedInput,
-            decoration: InputDecoration(
-              hintText: widget.promptPlaceHolder,
-              suffixIcon: IconButton(
-                onPressed: _busy || currentItemQuestionHasEmbeddedInput
-                    ? null
-                    : () {
-                        prompt(promptController.text);
-                        promptController.clear();
-                      },
-                icon: Icon(
-                  Icons.arrow_forward_ios,
-                  color: _busy || currentItemQuestionHasEmbeddedInput
-                      ? Theme.of(context).colorScheme.inversePrimary
-                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(
+                      ChattyWidget.borderRadiusDefault,
+                    ),
+                  ),
                 ),
+                controller: promptController,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                  ChattyWidget.borderRadiusDefault,
-                ),
-              ),
-            ),
-            controller: promptController,
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

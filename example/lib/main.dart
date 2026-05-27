@@ -32,6 +32,8 @@ class _MyAppState extends State<MyApp> {
     ),
   ];
 
+  late final ChattyWidgetController controller;
+
   var messageCounter = 0;
   final now = DateTime.now();
 
@@ -126,15 +128,31 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  @override
+  void initState() {
+    controller = ChattyWidgetController(items: initialItems);
+    super.initState();
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Example')),
+      appBar: AppBar(
+        title: Text('Example'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              controller.setItems([]);
+            },
+            icon: Icon(Icons.delete),
+          ),
+        ],
+      ),
       body: SafeArea(
         minimum: EdgeInsets.all(12),
-
         child: ChattyWidget(
+          withDateSeparator: true,
           style: ChattyWidgetStyle(
             userColor: Colors.limeAccent,
             userBorderColor: Colors.black,
@@ -160,8 +178,7 @@ class _MyAppState extends State<MyApp> {
           //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
           // ),
           onPrompt: onPrompt,
-          initialItems: initialItems,
-          withDateSeparator: true,
+          controller: controller,
           withDocuments: true,
           enterDateString: 'Enter the date!',
           documentsString: 'SOURCES:',
