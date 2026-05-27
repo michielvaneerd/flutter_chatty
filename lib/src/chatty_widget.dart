@@ -122,6 +122,10 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
+    setState(() {
+      _busy = true;
+    });
+
     List<ChattyItem> newItems = List<ChattyItem>.from(_controller.items.value);
 
     String? questionName;
@@ -145,10 +149,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       ChattyItem.fromAssistant(''),
     ); // Empty assistant message is thinking
     _controller.items.value = List<ChattyItem>.from(newItems);
-
-    setState(() {
-      _busy = true;
-    });
 
     final response = await widget.onPrompt(
       prompt,
@@ -213,7 +213,10 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                         assistantPersona: widget.assistantPersona,
                         onDocumentClicked: widget.onDocumentClicked,
                         withDocuments: widget.withDocuments,
-                        extraWidget: index == 0 && _busy
+                        extraWidget:
+                            index == 0 &&
+                                _busy &&
+                                item.source == ChattyItemSource.assistant
                             ? ChattyAnimatedDots(
                                 textStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
