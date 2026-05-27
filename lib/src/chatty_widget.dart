@@ -78,7 +78,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   final _listKey = GlobalKey<AnimatedListState>();
   var _previousItemCount = 0;
   var _busy = false;
-  String? _error;
   late List<ChattyItem> _items;
 
   @override
