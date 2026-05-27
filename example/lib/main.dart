@@ -129,6 +129,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     controller = ChattyWidgetController(items: initialItems);
     super.initState();

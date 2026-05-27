@@ -21,6 +21,10 @@ class ChattyWidgetController {
   List<ChattyItem> getItems() {
     return _items.value;
   }
+
+  void dispose() {
+    _items.dispose();
+  }
 }
 
 /// ChattyWidget is the main widget that contains the ChattyItemWidget items and the textfield for the prompt
@@ -108,6 +112,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   @override
   void dispose() {
     promptController.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -131,19 +138,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       newItems.add(item);
     }
     return newItems.reversed.toList();
-  }
-
-  /// Set the state.
-  /// @param newItems: the full items (including optional dateSeparator)
-  void setStateFull({bool busy = false, required fullItemListCount}) {
-    final diff = fullItemListCount - _previousItemCount;
-    for (int i = 0; i < diff; i++) {
-      _listKey.currentState?.insertItem(i);
-    }
-    _previousItemCount = fullItemListCount;
-    setState(() {
-      _busy = busy;
-    });
   }
 
   /// Handle new user prompt
