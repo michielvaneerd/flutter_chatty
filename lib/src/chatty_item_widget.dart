@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chatty/src/chatty_rich_text.dart';
 import 'package:flutter_chatty/src/chatty_widget.dart';
-import 'package:flutter_chatty/src/chatty_widget_cubit.dart';
+import 'package:flutter_chatty/src/chatty_widget_style.dart';
 import 'package:flutter_chatty/src/models.dart';
 import 'package:intl/intl.dart';
 
@@ -51,6 +50,7 @@ class ChattyItemWidget extends StatelessWidget {
   const ChattyItemWidget({
     super.key,
     required this.item,
+    required this.onPrompt,
     this.extraWidget,
     this.withDocuments = false,
     this.onDocumentClicked,
@@ -67,6 +67,7 @@ class ChattyItemWidget extends StatelessWidget {
   final String documentsString;
   final String enterDateString;
   final ChattyWidgetStyle style;
+  final void Function(String prompt, {String? answerValue}) onPrompt;
 
   static final dateFormat = DateFormat('y-MM-dd');
 
@@ -104,9 +105,9 @@ class ChattyItemWidget extends StatelessWidget {
                 );
 
                 if (date != null && context.mounted) {
-                  BlocProvider.of<ChattyWidgetCubit>(context).prompt(
+                  onPrompt(
                     DateFormat.yMd().format(date),
-                    value: dateFormat.format(date),
+                    answerValue: dateFormat.format(date),
                   );
                 }
               },
@@ -121,9 +122,7 @@ class ChattyItemWidget extends StatelessWidget {
               .map(
                 (e) => FilledButton(
                   onPressed: () {
-                    BlocProvider.of<ChattyWidgetCubit>(
-                      context,
-                    ).prompt(e.content, value: e.value);
+                    onPrompt(e.content, answerValue: e.value);
                   },
                   child: Text(e.content),
                 ),

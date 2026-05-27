@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chatty/src/chatty_widget.dart';
+import 'package:flutter_chatty/src/chatty_widget_style.dart';
 import 'package:intl/intl.dart';
 
 class ChattyDateSeparator extends StatelessWidget {
