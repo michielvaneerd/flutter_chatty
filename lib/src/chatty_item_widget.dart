@@ -70,16 +70,32 @@ class _TailPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = borderWidth!;
       final borderPath = Path();
+      final borderEraserPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth!;
+      final borderEraserPath = Path();
       if (isAssistant) {
         borderPath.moveTo(size.width, 0);
         borderPath.lineTo(0, size.height); // diagonal
         borderPath.lineTo(size.width, size.height); // horizontal
+        borderEraserPath.moveTo(size.width + (borderWidth! / 2), 0);
+        borderEraserPath.lineTo(
+          size.width + (borderWidth! / 2),
+          size.height - borderWidth!,
+        );
       } else {
         borderPath.moveTo(0, 0);
         borderPath.lineTo(size.width, size.height); // diagonal
         borderPath.lineTo(0, size.height); // horizontal
+        borderEraserPath.moveTo(0 - (borderWidth! / 2), 0);
+        borderEraserPath.lineTo(
+          0 - (borderWidth! / 2),
+          size.height - borderWidth!,
+        );
       }
       canvas.drawPath(borderPath, borderPaint);
+      canvas.drawPath(borderEraserPath, borderEraserPaint);
     }
   }
 
