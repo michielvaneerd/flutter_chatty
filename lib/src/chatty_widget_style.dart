@@ -35,6 +35,8 @@ class ChattyWidgetStyle {
   /// Padding for the user prompts
   final EdgeInsets? userPadding;
 
+  final double? borderWidth;
+
   /// Padding for the assistant responses
   final EdgeInsets? assistantPadding;
   const ChattyWidgetStyle({
@@ -43,6 +45,7 @@ class ChattyWidgetStyle {
     this.documentsLinkStyle,
     this.documentsStringStyle,
     this.timeStyle,
+    this.borderWidth,
     this.dateStyle,
     this.dateBoxDecoration,
     this.datePadding,

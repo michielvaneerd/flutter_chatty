@@ -146,6 +146,7 @@ class _MyAppState extends State<MyApp> {
               color: Colors.yellow,
               fontWeight: FontWeight.bold,
             ),
+            borderWidth: 1.0,
             datePadding: EdgeInsets.all(20),
             dateBoxDecoration: BoxDecoration(
               border: Border.all(color: Colors.black),

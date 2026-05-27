@@ -6,23 +6,45 @@ import 'package:flutter_chatty/src/models.dart';
 import 'package:intl/intl.dart';
 
 class _BubbleTail extends StatelessWidget {
-  const _BubbleTail({required this.color, required this.isAssistant});
+  const _BubbleTail({
+    required this.color,
+    required this.isAssistant,
+    required this.borderColor,
+    this.borderWidth,
+  });
   final Color color;
+  final Color borderColor;
   final bool isAssistant;
+  final double? borderWidth;
+
+  static const tailWidth = 8.0;
+  static const tailHeight = 12.0;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: const Size(8, 12),
-      painter: _TailPainter(color: color, isAssistant: isAssistant),
+      size: const Size(tailWidth, tailHeight),
+      painter: _TailPainter(
+        color: color,
+        isAssistant: isAssistant,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+      ),
     );
   }
 }
 
 class _TailPainter extends CustomPainter {
-  const _TailPainter({required this.color, required this.isAssistant});
+  const _TailPainter({
+    required this.color,
+    required this.isAssistant,
+    required this.borderColor,
+    this.borderWidth,
+  });
   final Color color;
+  final Color borderColor;
   final bool isAssistant;
+  final double? borderWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -40,10 +62,30 @@ class _TailPainter extends CustomPainter {
     }
     path.close();
     canvas.drawPath(path, paint);
+
+    if (borderWidth != null) {
+      // Border on diagonal and horizontal sides only
+      final borderPaint = Paint()
+        ..color = borderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = borderWidth!;
+      final borderPath = Path();
+      if (isAssistant) {
+        borderPath.moveTo(size.width, 0);
+        borderPath.lineTo(0, size.height); // diagonal
+        borderPath.lineTo(size.width, size.height); // horizontal
+      } else {
+        borderPath.moveTo(0, 0);
+        borderPath.lineTo(size.width, size.height); // diagonal
+        borderPath.lineTo(0, size.height); // horizontal
+      }
+      canvas.drawPath(borderPath, borderPaint);
+    }
   }
 
   @override
-  bool shouldRepaint(_TailPainter old) => old.color != color;
+  bool shouldRepaint(_TailPainter old) =>
+      old.color != color || old.borderColor != borderColor;
 }
 
 class ChattyItemWidget extends StatelessWidget {
@@ -150,123 +192,182 @@ class ChattyItemWidget extends StatelessWidget {
         right: !isAssistant ? 0 : ChattyWidget.paddingBig * 2,
       ),
       child: Row(
-        //spacing: ChattyWidget.paddingSmall,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (isAssistant && assistantPersona != null) assistantPersona!,
-          if (isAssistant)
-            _BubbleTail(color: assistantColor, isAssistant: isAssistant),
           Expanded(
-            child: Container(
-              padding:
-                  padding ??
-                  EdgeInsets.only(
-                    top: ChattyWidget.paddingDefault,
-                    left: ChattyWidget.paddingDefault,
-                    right: ChattyWidget.paddingDefault,
-                    bottom: ChattyWidget.paddingSmall,
-                  ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(ChattyWidget.borderRadiusDefault),
-                  topLeft: Radius.circular(ChattyWidget.borderRadiusDefault),
-                  bottomRight: isAssistant
-                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                      : Radius.zero,
-                  bottomLeft: !isAssistant
-                      ? Radius.circular(ChattyWidget.borderRadiusDefault)
-                      : Radius.zero,
-                ),
-                color: isAssistant ? assistantColor : userColor,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    spacing: ChattyWidget.paddingDefault,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (mainText.isNotEmpty)
-                        ChattyRichText(
-                          text: mainText,
-                          textStyle: isAssistant
-                              ? style.assistantTextStyle
-                              : style.userTextStyle,
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    SizedBox(width: _BubbleTail.tailWidth),
+                    Expanded(
+                      child: Container(
+                        padding:
+                            padding ??
+                            EdgeInsets.only(
+                              top: ChattyWidget.paddingDefault,
+                              left: ChattyWidget.paddingDefault,
+                              right: ChattyWidget.paddingDefault,
+                              bottom: ChattyWidget.paddingSmall,
+                            ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(
+                              ChattyWidget.borderRadiusDefault,
+                            ),
+                            topLeft: Radius.circular(
+                              ChattyWidget.borderRadiusDefault,
+                            ),
+                            bottomRight: isAssistant
+                                ? Radius.circular(
+                                    ChattyWidget.borderRadiusDefault,
+                                  )
+                                : Radius.zero,
+                            bottomLeft: !isAssistant
+                                ? Radius.circular(
+                                    ChattyWidget.borderRadiusDefault,
+                                  )
+                                : Radius.zero,
+                          ),
+                          color: isAssistant ? assistantColor : userColor,
+                          border: style.borderWidth != null
+                              ? Border.all(
+                                  width: style.borderWidth!,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outlineVariant,
+                                )
+                              : null,
                         ),
-                      ?getAnswers(context),
-                      ?extraWidget,
-                      if (withDocuments &&
-                          item.documents != null &&
-                          item.documents!.isNotEmpty)
-                        Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              documentsString,
-                              style:
-                                  style.documentsStringStyle ??
-                                  (style.assistantTextStyle ?? TextStyle())
-                                      .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            ...item.documents!.map(
-                              (e) => InkWell(
-                                onTap: onDocumentClicked != null
-                                    ? () {
-                                        onDocumentClicked!(e);
-                                      }
-                                    : null,
-                                child: Text(
-                                  e.title,
-                                  style:
-                                      style.documentsLinkStyle ??
-                                      (style.assistantTextStyle ?? TextStyle())
-                                          .copyWith(
-                                            decoration:
-                                                TextDecoration.underline,
+                            Column(
+                              spacing: ChattyWidget.paddingDefault,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (mainText.isNotEmpty)
+                                  ChattyRichText(
+                                    text: mainText,
+                                    textStyle: isAssistant
+                                        ? style.assistantTextStyle
+                                        : style.userTextStyle,
+                                  ),
+                                ?getAnswers(context),
+                                ?extraWidget,
+                                if (withDocuments &&
+                                    item.documents != null &&
+                                    item.documents!.isNotEmpty)
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        documentsString,
+                                        style:
+                                            style.documentsStringStyle ??
+                                            (style.assistantTextStyle ??
+                                                    TextStyle())
+                                                .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                      ),
+                                      ...item.documents!.map(
+                                        (e) => InkWell(
+                                          onTap: onDocumentClicked != null
+                                              ? () {
+                                                  onDocumentClicked!(e);
+                                                }
+                                              : null,
+                                          child: Text(
+                                            e.title,
+                                            style:
+                                                style.documentsLinkStyle ??
+                                                (style.assistantTextStyle ??
+                                                        TextStyle())
+                                                    .copyWith(
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                    ),
                                           ),
-                                ),
-                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                if (item.error != null)
+                                  Row(
+                                    spacing: ChattyWidget.paddingDefault,
+                                    children: [
+                                      Icon(
+                                        Icons.warning,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
+                                      ),
+                                      Flexible(
+                                        child: Text(
+                                          item.error!,
+                                          //style: TextStyle(color: )
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
                             ),
-                          ],
-                        ),
-                      if (item.error != null)
-                        Row(
-                          spacing: ChattyWidget.paddingDefault,
-                          children: [
-                            Icon(
-                              Icons.warning,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            Flexible(
+                            Align(
+                              alignment: AlignmentGeometry.bottomEnd,
                               child: Text(
-                                item.error!,
-                                //style: TextStyle(color: )
+                                DateFormat.Hm().format(item.createdAt),
+                                style:
+                                    style.timeStyle ??
+                                    (style.assistantTextStyle ?? TextStyle())
+                                        .copyWith(
+                                          fontSize: Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall!.fontSize,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                        ),
                               ),
                             ),
                           ],
                         ),
-                    ],
-                  ),
-                  Align(
-                    alignment: AlignmentGeometry.bottomEnd,
-                    child: Text(
-                      DateFormat.Hm().format(item.createdAt),
-                      style:
-                          style.timeStyle ??
-                          (style.assistantTextStyle ?? TextStyle()).copyWith(
-                            fontSize: Theme.of(
-                              context,
-                            ).textTheme.labelSmall!.fontSize,
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
+                      ),
+                    ),
+                    SizedBox(width: _BubbleTail.tailWidth),
+                  ],
+                ),
+                if (isAssistant)
+                  Positioned(
+                    bottom: style.borderWidth != null
+                        ? (style.borderWidth! / 2)
+                        : 0,
+                    left: style.borderWidth,
+                    child: _BubbleTail(
+                      color: assistantColor,
+                      isAssistant: isAssistant,
+                      borderColor: Theme.of(context).colorScheme.outlineVariant,
+                      borderWidth: style.borderWidth,
                     ),
                   ),
-                ],
-              ),
+                if (!isAssistant)
+                  Positioned(
+                    bottom: style.borderWidth != null
+                        ? (style.borderWidth! / 2)
+                        : 0,
+                    right: style.borderWidth,
+                    child: _BubbleTail(
+                      color: userColor,
+                      isAssistant: isAssistant,
+                      borderColor: Theme.of(context).colorScheme.outlineVariant,
+                      borderWidth: style.borderWidth,
+                    ),
+                  ),
+              ],
             ),
           ),
-          if (!isAssistant)
-            _BubbleTail(color: userColor, isAssistant: isAssistant),
         ],
       ),
     );
