@@ -136,7 +136,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    controller = ChattyWidgetController(items: initialItems);
+    controller = ChattyWidgetController(initialItems: initialItems);
     super.initState();
   }
 
@@ -149,7 +149,7 @@ class _MyAppState extends State<MyApp> {
         actions: [
           IconButton(
             onPressed: () {
-              controller.setItems([]);
+              controller.items.value = [];
             },
             icon: Icon(Icons.delete),
           ),

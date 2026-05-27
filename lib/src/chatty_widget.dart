@@ -5,35 +5,18 @@ import 'package:flutter_chatty/src/chatty_animated_dots.dart';
 import 'package:flutter_chatty/src/chatty_date_separator.dart';
 import 'package:flutter_chatty/src/chatty_helpers.dart';
 import 'package:flutter_chatty/src/chatty_item_widget.dart';
+import 'package:flutter_chatty/src/chatty_widget_controller.dart';
 import 'package:flutter_chatty/src/chatty_widget_style.dart';
 import 'package:flutter_chatty/src/models.dart';
-
-/// Controller that handles all actions on the items.
-class ChattyWidgetController {
-  ChattyWidgetController({List<ChattyItem>? items})
-    : _items = ValueNotifier<List<ChattyItem>>(items ?? []);
-  final ValueNotifier<List<ChattyItem>>
-  _items; // Clean list without extra items, like dateSeparator.
-  void setItems(List<ChattyItem> items) {
-    _items.value = items;
-  }
-
-  List<ChattyItem> getItems() {
-    return _items.value;
-  }
-
-  void dispose() {
-    _items.dispose();
-  }
-}
 
 /// ChattyWidget is the main widget that contains the ChattyItemWidget items and the textfield for the prompt
 class ChattyWidget extends StatefulWidget {
   const ChattyWidget({
     super.key,
     required this.onPrompt,
-    this.withDocuments = false,
+    this.initialItems,
     this.withDateSeparator = false,
+    this.withDocuments = false,
     this.themeData,
     this.onDocumentClicked,
     this.promptPlaceHolder,
@@ -60,6 +43,10 @@ class ChattyWidget extends StatefulWidget {
   })
   onPrompt;
 
+  /// Optional initial ChattyItems, for example to display a first assistant message or the history of a conversation.
+  final List<ChattyItem>? initialItems;
+
+  /// Whether to display the date separator widget.
   final bool withDateSeparator;
 
   /// The style for this ChattyWidget and ChattyItemWidget items.
@@ -92,8 +79,6 @@ class ChattyWidget extends StatefulWidget {
 
 class _ChattyWidgetState extends State<ChattyWidget> {
   final promptController = TextEditingController();
-  final _listKey = GlobalKey<AnimatedListState>();
-  var _previousItemCount = 0;
   var _busy = false;
   late final ChattyWidgetController _controller;
 
@@ -105,7 +90,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       _controller = widget
           .controller!; // This one can have some initialItems and withDateSeparator
     }
-    _previousItemCount = getFullItems().length;
     super.initState();
   }
 
@@ -120,13 +104,13 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   List<ChattyItem> getFullItems() {
     if (!widget.withDateSeparator) {
-      return _controller.getItems();
+      return _controller.items.value;
     }
     // Items has the most recent item at index 0
     // So instead of ADDING the date separator to the END of the list BEFORE the first message with a new date
     final List<ChattyItem> newItems = [];
     final Map<DateTime, bool> dates = {};
-    for (final item in _controller.getItems().reversed) {
+    for (final item in _controller.items.value.reversed) {
       // We reverse the list, so now the oldest entry is at index 0
       final date = ChattyHelpers.getDate(item.createdAt);
       if (!dates.containsKey(date)) {
@@ -142,7 +126,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
-    List<ChattyItem> newItems = List<ChattyItem>.from(_controller.getItems());
+    List<ChattyItem> newItems = List<ChattyItem>.from(_controller.items.value);
 
     String? questionName;
 
@@ -155,7 +139,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
     // Add the user answer to the items
     newItems.insert(0, ChattyItem.fromUser(prompt));
-    _controller.setItems(newItems);
+    _controller.items.value = newItems;
 
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
@@ -164,7 +148,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       0,
       ChattyItem.fromAssistant(''),
     ); // Empty assistant message is thinking
-    _controller.setItems(List<ChattyItem>.from(newItems));
+    _controller.items.value = List<ChattyItem>.from(newItems);
 
     setState(() {
       _busy = true;
@@ -176,12 +160,10 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       answerValue: answerValue,
     );
 
-    _controller.setItems(
-      List<ChattyItem>.from(
-        newItems
-          ..removeAt(0)
-          ..insert(0, response),
-      ),
+    _controller.items.value = List<ChattyItem>.from(
+      newItems
+        ..removeAt(0)
+        ..insert(0, response),
     );
 
     setState(() {
@@ -194,39 +176,32 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     return Theme(
       data: widget.themeData ?? Theme.of(context),
       child: ValueListenableBuilder(
-        valueListenable: _controller._items,
+        valueListenable: _controller.items,
         builder: (context, value, child) {
-          final fullItems = getFullItems();
           final currentItemQuestionHasEmbeddedInput =
-              fullItems.isNotEmpty &&
-              fullItems.first.question != null &&
-              ChattyItemWidget.hasEmbeddedInput(fullItems.first.question!.type);
-          // Don't think this is ok...
-          final diff = fullItems.length - _previousItemCount;
-          for (int i = 0; i < diff; i++) {
-            _listKey.currentState?.insertItem(i);
-          }
-          _previousItemCount = fullItems.length;
+              _controller.items.value.isNotEmpty &&
+              _controller.items.value.first.question != null &&
+              ChattyItemWidget.hasEmbeddedInput(
+                _controller.items.value.first.question!.type,
+              );
           return Column(
             children: [
               Expanded(
-                child: AnimatedList(
-                  key: _listKey,
+                child: ListView.separated(
                   reverse: true,
-                  initialItemCount: _previousItemCount,
-                  itemBuilder: (context, index, animation) {
-                    if (index >= fullItems.length) {
-                      return const SizedBox.shrink();
-                    }
-                    final item = fullItems[index];
-                    final Widget child;
+                  itemCount: _controller.items.value.length,
+                  separatorBuilder: (context, index) {
+                    return SizedBox(height: ChattyWidget.paddingDefault);
+                  },
+                  itemBuilder: (context, index) {
+                    final item = _controller.items.value[index];
                     if (item.source == ChattyItemSource.dateSeparator) {
-                      child = ChattyDateSeparator(
+                      return ChattyDateSeparator(
                         date: item.createdAt,
                         style: widget.style,
                       );
                     } else {
-                      child = ChattyItemWidget(
+                      return ChattyItemWidget(
                         item: item,
                         style: widget.style,
                         onPrompt: prompt,
@@ -244,18 +219,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                             : null,
                       );
                     }
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        top: ChattyWidget.paddingBig,
-                      ),
-                      child: FadeTransition(
-                        opacity: CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeIn,
-                        ),
-                        child: child,
-                      ),
-                    );
                   },
                 ),
               ),
