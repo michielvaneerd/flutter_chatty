@@ -1,17 +1,17 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_chatty/flutter_chatty.dart';
-import 'package:flutter_chatty/src/chatty_widget_change_notifier.dart';
 
 /// Controller that handles all actions on the items.
 class ChattyWidgetController {
   ChattyWidgetController({List<ChattyItem>? initialItems})
-    : notifier = ChattyWidgetChangeNotifier(
+    : state = ValueNotifier<ChattyWidgetState>(
         ChattyWidgetState(items: initialItems ?? [], busy: false),
       );
 
   // Clean list with only messages and NO extra items like dateSeparator
-  final ChattyWidgetChangeNotifier notifier;
+  final ValueNotifier<ChattyWidgetState> state;
 
   void dispose() {
-    notifier.dispose();
+    state.dispose();
   }
 }

@@ -99,13 +99,13 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   List<ChattyItem> getFullItems() {
     if (!widget.withDateSeparator) {
-      return _controller.state.value.items;
+      return _controller.notifier.chattyWidgetState.items.toList();
     }
     // Items has the most recent item at index 0
     // So instead of ADDING the date separator to the END of the list BEFORE the first message with a new date
     final List<ChattyItem> newItems = [];
     final Map<DateTime, bool> dates = {};
-    for (final item in _controller.state.value.items.reversed) {
+    for (final item in _controller.notifier.chattyWidgetState.items.reversed) {
       // We reverse the list, so now the oldest entry is at index 0
       final date = ChattyHelpers.getDate(item.createdAt);
       if (!dates.containsKey(date)) {
@@ -121,41 +121,49 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
-    _controller.state.value = ChattyWidgetState(
-      items: _controller.state.value.items,
-      busy: true,
-    );
+    // We mutate the items here. And the only reason this works in the ListenableBuilder,
+    // is that the first thing we do is call getFullItems, which always returns a copy of the list!
+    // If we didn't return a copy but the original list, we could get into trouble.
 
-    List<ChattyItem> newItems = List<ChattyItem>.from(
-      _controller.state.value.items,
+    _controller.notifier.update(
+      ChattyWidgetState(
+        items: _controller.notifier.chattyWidgetState.items,
+        busy: true,
+      ),
     );
 
     String? questionName;
 
-    if (newItems.isNotEmpty && newItems.first.question != null) {
+    if (_controller.notifier.chattyWidgetState.items.isNotEmpty &&
+        _controller.notifier.chattyWidgetState.items.first.question != null) {
       // This is an answer to this question. We remove the question from this item,
       // so then it will be a normal assistant message without answering options anymore.
-      questionName = newItems.first.question!.name;
-      newItems[0] = newItems.first.copyWith(removeQuestion: true);
+      questionName =
+          _controller.notifier.chattyWidgetState.items.first.question!.name;
+      // Note: NO update(), so NO notifyListeners. But is not needed here, because below we do this already immediately after this.
+      _controller.notifier.chattyWidgetState.items[0] = _controller
+          .notifier
+          .chattyWidgetState
+          .items
+          .first
+          .copyWith(removeQuestion: true);
     }
 
     // Add the user answer to the items
-    newItems.insert(0, ChattyItem.fromUser(prompt));
-    _controller.state.value = ChattyWidgetState(items: newItems, busy: true);
+    _controller.notifier.chattyWidgetState.items.insert(
+      0,
+      ChattyItem.fromUser(prompt),
+    );
+    _controller.notifier.update(_controller.notifier.chattyWidgetState);
 
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
-    newItems = List<ChattyItem>.from(newItems);
     // Add the "thinking" assistant message
-    newItems.insert(
+    _controller.notifier.chattyWidgetState.items.insert(
       0,
       ChattyItem.fromAssistant(''),
     ); // Empty assistant message is thinking
-
-    _controller.state.value = ChattyWidgetState(
-      items: List<ChattyItem>.from(newItems),
-      busy: true,
-    );
+    _controller.notifier.update(_controller.notifier.chattyWidgetState);
 
     final response = await widget.onPrompt(
       prompt,
@@ -163,13 +171,14 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       answerValue: answerValue,
     );
 
-    _controller.state.value = ChattyWidgetState(
-      items: List<ChattyItem>.from(
-        newItems
+    _controller.notifier.update(
+      ChattyWidgetState(
+        items: _controller.notifier.chattyWidgetState.items
           ..removeAt(0)
           ..insert(0, response),
+
+        busy: false,
       ),
-      busy: false,
     );
   }
 
@@ -177,10 +186,11 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   Widget build(BuildContext context) {
     return Theme(
       data: widget.themeData ?? Theme.of(context),
-      child: ValueListenableBuilder(
-        valueListenable: _controller.state,
-        builder: (context, value, child) {
+      child: ListenableBuilder(
+        listenable: _controller.notifier,
+        builder: (context, child) {
           final fullItems = getFullItems();
+          final busy = _controller.notifier.chattyWidgetState.busy;
           final currentItemQuestionHasEmbeddedInput =
               fullItems.isNotEmpty &&
               fullItems.first.question != null &&
@@ -222,7 +232,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                         withDocuments: widget.withDocuments,
                         extraWidget:
                             index == 0 &&
-                                value.busy &&
+                                busy &&
                                 item.source == ChattyItemSource.assistant &&
                                 item.content.isEmpty
                             ? ChattyAnimatedDots(
@@ -254,7 +264,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(
-                    onPressed: value.busy || currentItemQuestionHasEmbeddedInput
+                    onPressed: busy || currentItemQuestionHasEmbeddedInput
                         ? null
                         : () {
                             prompt(promptController.text);
@@ -262,7 +272,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                           },
                     icon: Icon(
                       Icons.arrow_forward_ios,
-                      color: value.busy || currentItemQuestionHasEmbeddedInput
+                      color: busy || currentItemQuestionHasEmbeddedInput
                           ? Theme.of(context).colorScheme.inversePrimary
                           : null,
                     ),
