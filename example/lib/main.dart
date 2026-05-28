@@ -149,7 +149,10 @@ class _MyAppState extends State<MyApp> {
         actions: [
           IconButton(
             onPressed: () {
-              controller.items.value = [];
+              controller.state.value = ChattyWidgetState(
+                items: [],
+                busy: false,
+              );
             },
             icon: Icon(Icons.delete),
           ),

@@ -74,7 +74,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   final promptController = TextEditingController();
   final _listKey = GlobalKey<AnimatedListState>();
   var _previousItemCount = 0;
-  var _busy = false;
   late final ChattyWidgetController _controller;
 
   @override
@@ -100,13 +99,13 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   List<ChattyItem> getFullItems() {
     if (!widget.withDateSeparator) {
-      return _controller.items.value;
+      return _controller.state.value.items;
     }
     // Items has the most recent item at index 0
     // So instead of ADDING the date separator to the END of the list BEFORE the first message with a new date
     final List<ChattyItem> newItems = [];
     final Map<DateTime, bool> dates = {};
-    for (final item in _controller.items.value.reversed) {
+    for (final item in _controller.state.value.items.reversed) {
       // We reverse the list, so now the oldest entry is at index 0
       final date = ChattyHelpers.getDate(item.createdAt);
       if (!dates.containsKey(date)) {
@@ -122,11 +121,14 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
-    setState(() {
-      _busy = true;
-    });
+    _controller.state.value = ChattyWidgetState(
+      items: _controller.state.value.items,
+      busy: true,
+    );
 
-    List<ChattyItem> newItems = List<ChattyItem>.from(_controller.items.value);
+    List<ChattyItem> newItems = List<ChattyItem>.from(
+      _controller.state.value.items,
+    );
 
     String? questionName;
 
@@ -139,16 +141,21 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
     // Add the user answer to the items
     newItems.insert(0, ChattyItem.fromUser(prompt));
-    _controller.items.value = newItems;
+    _controller.state.value = ChattyWidgetState(items: newItems, busy: true);
 
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
+    newItems = List<ChattyItem>.from(newItems);
     // Add the "thinking" assistant message
     newItems.insert(
       0,
       ChattyItem.fromAssistant(''),
     ); // Empty assistant message is thinking
-    _controller.items.value = List<ChattyItem>.from(newItems);
+
+    _controller.state.value = ChattyWidgetState(
+      items: List<ChattyItem>.from(newItems),
+      busy: true,
+    );
 
     final response = await widget.onPrompt(
       prompt,
@@ -156,15 +163,14 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       answerValue: answerValue,
     );
 
-    _controller.items.value = List<ChattyItem>.from(
-      newItems
-        ..removeAt(0)
-        ..insert(0, response),
+    _controller.state.value = ChattyWidgetState(
+      items: List<ChattyItem>.from(
+        newItems
+          ..removeAt(0)
+          ..insert(0, response),
+      ),
+      busy: false,
     );
-
-    setState(() {
-      _busy = false;
-    });
   }
 
   @override
@@ -172,7 +178,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     return Theme(
       data: widget.themeData ?? Theme.of(context),
       child: ValueListenableBuilder(
-        valueListenable: _controller.items,
+        valueListenable: _controller.state,
         builder: (context, value, child) {
           final fullItems = getFullItems();
           final currentItemQuestionHasEmbeddedInput =
@@ -196,6 +202,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                     if (index >= fullItems.length) {
                       return const SizedBox.shrink();
                     }
+
                     final item = fullItems[index];
                     final Widget child;
                     if (item.source == ChattyItemSource.dateSeparator) {
@@ -215,8 +222,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                         withDocuments: widget.withDocuments,
                         extraWidget:
                             index == 0 &&
-                                _busy &&
-                                item.source == ChattyItemSource.assistant
+                                value.busy &&
+                                item.source == ChattyItemSource.assistant &&
+                                item.content.isEmpty
                             ? ChattyAnimatedDots(
                                 textStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -246,7 +254,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(
-                    onPressed: _busy || currentItemQuestionHasEmbeddedInput
+                    onPressed: value.busy || currentItemQuestionHasEmbeddedInput
                         ? null
                         : () {
                             prompt(promptController.text);
@@ -254,7 +262,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                           },
                     icon: Icon(
                       Icons.arrow_forward_ios,
-                      color: _busy || currentItemQuestionHasEmbeddedInput
+                      color: value.busy || currentItemQuestionHasEmbeddedInput
                           ? Theme.of(context).colorScheme.inversePrimary
                           : null,
                     ),
