@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
     ),
   ];
 
-  late final ChattyWidgetController controller;
+  final controller = ChattyWidgetController();
 
   var messageCounter = 0;
   final now = DateTime.now();
@@ -136,8 +136,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    controller = ChattyWidgetController(initialItems: initialItems);
     super.initState();
+    init();
+  }
+
+  void init() async {
+    controller.notifier.update(ChattyWidgetState(items: initialItems));
   }
 
   // This widget is the root of your application.

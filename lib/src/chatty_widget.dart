@@ -18,6 +18,7 @@ class ChattyWidget extends StatefulWidget {
     this.onDocumentClicked,
     this.promptPlaceHolder,
     this.assistantPersona,
+    this.promptTextFieldDisabled = false,
     this.documentsString = 'Sources:',
     this.enterDateString = 'Enter date',
     this.style = const ChattyWidgetStyle(),
@@ -40,7 +41,11 @@ class ChattyWidget extends StatefulWidget {
   })
   onPrompt;
 
+  /// Whether to display the date above the items (one for each date)
   final bool withDateSeparator;
+
+  /// Whether the textfield should be disabled.
+  final bool promptTextFieldDisabled;
 
   /// The style for this ChattyWidget and ChattyItemWidget items.
   final ChattyWidgetStyle style;
@@ -264,11 +269,16 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(
-                    onPressed: busy || currentItemQuestionHasEmbeddedInput
+                    onPressed:
+                        busy ||
+                            currentItemQuestionHasEmbeddedInput ||
+                            widget.promptTextFieldDisabled
                         ? null
                         : () {
-                            prompt(promptController.text);
-                            promptController.clear();
+                            if (promptController.text.isNotEmpty) {
+                              prompt(promptController.text);
+                              promptController.clear();
+                            }
                           },
                     icon: Icon(
                       Icons.arrow_forward_ios,
