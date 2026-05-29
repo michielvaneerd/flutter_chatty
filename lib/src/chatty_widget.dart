@@ -23,6 +23,7 @@ class ChattyWidget extends StatefulWidget {
     this.enterDateString = 'Enter date',
     this.style = const ChattyWidgetStyle(),
     this.controller,
+    this.onItemExtraWidget,
   });
 
   static const paddingDefault = 12.0;
@@ -30,7 +31,11 @@ class ChattyWidget extends StatefulWidget {
   static const paddingBig = 24.0;
   static const borderRadiusDefault = 18.0;
 
+  /// Controls the chat items
   final ChattyWidgetController? controller;
+
+  /// Callback that is called for each chat item and can be used to return a custom extra widget to display.
+  final Widget? Function(ChattyItem item)? onItemExtraWidget;
 
   /// Required callback that is called when the user enters a new prompt and optionaly a value of an answer.
   /// This is the place to send this prompt to the LLM and returns the response as a ChattyItem.
@@ -226,6 +231,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                         style: widget.style,
                       );
                     } else {
+                      final extraWidget = widget.onItemExtraWidget != null
+                          ? widget.onItemExtraWidget!(item)
+                          : null;
                       child = ChattyItemWidget(
                         item: item,
                         style: widget.style,
@@ -245,7 +253,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               )
-                            : null,
+                            : extraWidget,
                       );
                     }
                     return Padding(
