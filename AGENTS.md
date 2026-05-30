@@ -1,99 +1,58 @@
-# Flutter Chatty Package Agent Instructions
+# flutter_chatty — Agent Instructions
 
-This package provides a Flutter chat UI component with support for user/assistant messages, questions, document references, date separators, and customizable styling.
+Flutter plugin providing a ready-to-use chat UI widget (`ChattyWidget`) designed for LLM integration. See [README.md](README.md) for usage overview.
+
+## Build & Test Commands
+
+```bash
+flutter pub get       # fetch dependencies
+flutter analyze       # lint (flutter_lints)
+flutter test          # run unit/widget tests
+cd example && flutter run   # run demo app
+```
 
 ## Project Structure
 
-- `lib/flutter_chatty.dart` - Main entry point
-- `lib/src/` - Core implementation files:
-  - `chatty_widget.dart` - Main chat widget
-  - `chatty_item_widget.dart` - Individual message item widget
-  - `chatty_widget_cubit.dart` - State management
-  - `models.dart` - Data models for chat items, questions, documents
-  - `chatty_helpers.dart` - Helper functions
-  - `chatty_rich_text.dart` - Rich text rendering
-  - `chatty_animated_dots.dart` - Animated typing indicator
-  - `chatty_date_separator.dart` - Date separator widget
+| Path | Purpose |
+|------|---------|
+| `lib/flutter_chatty.dart` | Public API — all exports |
+| `lib/src/` | Implementation; all classes prefixed with `Chatty` |
+| `example/lib/main.dart` | Demo app; shows all features and usage patterns |
+| `test/flutter_chatty_test.dart` | Unit/widget tests |
 
-## Key Concepts
+## Architecture
 
-### Chat Items
-- `ChattyItem` represents a single message with content, source, and metadata
-- Sources: `user`, `assistant`, `dateSeparator`
-- Supports questions with different types: `text`, `int`, `email`, `date`, `singleChoice`
-- Supports document references for RAG applications
+State management uses **ChangeNotifier + immutable state**:
 
-### State Management
-- Uses `flutter_bloc` for state management
-- `ChattyWidgetCubit` handles the chat state and user interactions
+- `ChattyWidgetController` → wraps `ChattyWidgetChangeNotifier`
+- `ChattyWidgetChangeNotifier` (ChangeNotifier) → holds `ChattyWidgetState`
+- `ChattyWidgetState` (Equatable) → immutable; holds `items` list + `isBusy` flag
+- `ChattyWidget` uses `ListenableBuilder` to rebuild on state changes
 
-### Styling
-- Customizable via `ChattyWidgetStyle` class
-- Supports colors, text styles, and paddings for different message types
-- Theme override support via `themeData` parameter
+Items are stored in **reverse chronological order** (newest at index 0).
 
-## Core Functions
+## Key Classes
 
-### ChattyWidget
-The main widget that displays the chat interface. Key parameters:
-- `onPrompt`: Callback that receives user prompts and returns assistant responses
-- `initialItems`: Pre-populated messages
-- `withDateSeparator`: Show date headers between days
-- `withDocuments`: Show document references
-- `style`: Visual customization options
-- `themeData`: Theme override
+| Class | Role |
+|-------|------|
+| `ChattyWidget` | Main StatefulWidget; renders list, handles text input |
+| `ChattyWidgetController` | External handle for adding/updating items |
+| `ChattyItem` | Message model; factory constructors `fromUser()`, `fromAssistant()`, `fromDateSeparator()` |
+| `ChattyQuestion` | Structured question (types: `text`, `int`, `email`, `date`, `singleChoice`) |
+| `ChattyDocument` | Source reference for RAG (types: `pdf`, `docx`, `url`) |
+| `ChattyWidgetStyle` | Immutable styling config; prefer named constructor with override fields |
 
-### Message Creation
-- `ChattyItem.fromUser(content)` - Create a user message
-- `ChattyItem.fromAssistant(content)` - Create an assistant message
-- `ChattyItem.fromAssistant(content, question: ChattyQuestion(...))` - Create a question
-- `ChattyItem.fromAssistant(content, documents: [ChattyDocument(...)])` - Create with documents
+## Conventions
 
-## Usage Patterns
+- **All public types use `Chatty` prefix.** Private helpers use leading `_`.
+- **Models extend `Equatable`** — always include all fields in `props`.
+- **Immutable state updates:** mutate a copy of the items list, then call `notifyListeners()` via `update()` — never mutate the live state object directly.
+- **Constants defined at class level** (e.g., `paddingDefault = 12.0`, `borderRadiusDefault = 18.0`).
+- **onPrompt callback** is the integration point for LLM calls; it is `async` and receives `(String prompt, {String? questionName, String? answerValue})`.
+- `getFullItems()` injects `ChattyDateSeparator` items at runtime — do not store separators in the items list.
 
-### Basic Chat
-```dart
-ChattyWidget(
-  onPrompt: (String prompt, {String? value}) async {
-    // Send to backend and return ChattyItem
-    return ChattyItem.fromAssistant('Response to: $prompt');
-  },
-)
-```
+## Common Pitfalls
 
-### With Questions
-```dart
-ChattyItem.fromAssistant(
-  'What is your name?',
-  question: ChattyQuestion(type: ChattyQuestionType.text),
-)
-```
-
-### With Documents
-```dart
-ChattyItem.fromAssistant(
-  'Here are the sources:',
-  documents: [
-    ChattyDocument(uri: 'https://example.com', type: ChattyDocumentType.url, title: 'Example'),
-  ],
-)
-```
-
-## Development Guidelines
-
-1. All widgets are stateless for better performance
-2. Uses `flutter_bloc` for state management
-3. Supports rich text with HTML tags: `<p>`, `<b>`, `<strong>`, `<i>`, `<em>`
-4. Follows Flutter best practices for widget composition
-5. Uses `equatable` for proper object equality in models
-6. Implements proper date formatting with `intl` package
-7. Supports localization through string parameters
-
-## Testing
-
-The package includes unit tests in `test/` directory. Tests cover:
-- Widget rendering
-- State management
-- Message creation
-- Question handling
-- Document display
+- When adding a new `ChattyItem` type or `ChattyQuestionType`, update the relevant `switch` statements in `ChattyItemWidget` and `ChattyWidget`.
+- The "thinking" bubble is a temporary `fromAssistant("")` item inserted while awaiting `onPrompt`; replace it by index, don't append.
+- `ChattyWidget` can accept an external `controller` or auto-create an internal one — do not assume one or the other when reading call sites.
