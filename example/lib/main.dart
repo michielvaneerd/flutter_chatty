@@ -141,6 +141,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void init() async {
+    // Imitate an asynchronous update of the controller.
     controller.notifier.update(ChattyWidgetState(items: initialItems));
   }
 
@@ -164,6 +165,11 @@ class _MyAppState extends State<MyApp> {
       body: SafeArea(
         minimum: EdgeInsets.all(12),
         child: ChattyWidget(
+          animated: true,
+          // animationTransition: (item, animation) => ScaleTransition(
+          //   scale: CurvedAnimation(parent: animation, curve: Curves.easeIn),
+          //   child: item,
+          // ),
           withDateSeparator: true,
           style: ChattyWidgetStyle(
             userColor: Colors.limeAccent,

@@ -13,7 +13,7 @@ class ChattyAnimatedDots extends StatefulWidget {
 class _ChattyAnimatedDotsState extends State<ChattyAnimatedDots> {
   late Timer _timer;
   int counter = 0;
-  static const maxCount = 5;
+  static const maxCount = 4;
 
   @override
   void initState() {
@@ -37,6 +37,10 @@ class _ChattyAnimatedDotsState extends State<ChattyAnimatedDots> {
 
   @override
   Widget build(BuildContext context) {
-    return Text(List.filled(counter, '.').join(' '), style: widget.textStyle);
+    return Transform.scale(
+      scale: 1.5,
+      alignment: Alignment.centerLeft,
+      child: Text(List.filled(counter, '.').join(' '), style: widget.textStyle),
+    );
   }
 }
