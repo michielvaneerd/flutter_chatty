@@ -68,6 +68,8 @@ Future<ChattyItem> onPrompt(
 }
 ```
 
+When this callback is called from an answer to a question, then the `questionName` parameter contains the name of the question and the `answerValue` parameter contains the value of the answer (for single choice questions).
+
 ### Using a Controller
 
 Use `ChattyWidgetController` to manage chat state externally (e.g., pre-populate with history or clear the conversation):
