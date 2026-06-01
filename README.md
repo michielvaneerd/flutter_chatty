@@ -91,7 +91,7 @@ ChattyWidget(
 );
 
 // Clear conversation:
-controller.notifier.update(ChattyWidgetState(items: [], busy: false));
+controller.update(items: []);
 
 // Don't forget to dispose when done:
 controller.dispose();
