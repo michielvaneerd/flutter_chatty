@@ -244,7 +244,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
         key: _listKey,
         initialItemCount: _previousItemCount,
         itemBuilder: (context, index, animation) {
-          // Needed?
           // if (index >= fullItems.length) {
           //   return const SizedBox.shrink();
           // }
@@ -303,6 +302,11 @@ class _ChattyWidgetState extends State<ChattyWidget> {
               fullItems.first.question != null &&
               ChattyItemWidget.hasEmbeddedInput(fullItems.first.question!.type);
           if (widget.animated) {
+            if (fullItems.isEmpty) {
+              _listKey.currentState?.removeAllItems(
+                (context, animation) => SizedBox.shrink(),
+              );
+            }
             final diff = fullItems.length - _previousItemCount;
             for (int i = 0; i < diff; i++) {
               _listKey.currentState?.insertItem(i);

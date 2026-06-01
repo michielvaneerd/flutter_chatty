@@ -16,21 +16,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final itemWithExtraWidget = ChattyItem.fromAssistant(
+    'I can show a demo of the Flutter Chatty library.\n\nThis message has a custom extra Widget in it.',
+    createdAt: DateTime.now().subtract(Duration(minutes: 3)),
+  );
+
   /// The initialItems can be used for a first assistant message or the previous conversation
-  final initialItems = [
-    ChattyItem.fromAssistant(
-      'I can show a demo of the Flutter Chatty library',
-      createdAt: DateTime.now().subtract(Duration(minutes: 3)),
-    ),
-    ChattyItem.fromUser(
-      'What can you do?',
-      createdAt: DateTime.now().subtract(Duration(minutes: 4)),
-    ),
-    ChattyItem.fromAssistant(
-      'Hi, I am the demo assistant. How can I help you?',
-      createdAt: DateTime.now().subtract(Duration(minutes: 5)),
-    ),
-  ];
+  late final List<ChattyItem> initialItems;
 
   final controller = ChattyWidgetController();
 
@@ -137,6 +129,17 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    initialItems = [
+      itemWithExtraWidget,
+      ChattyItem.fromUser(
+        'What can you do?',
+        createdAt: DateTime.now().subtract(Duration(minutes: 4)),
+      ),
+      ChattyItem.fromAssistant(
+        'Hi, I am the demo assistant. How can I help you?',
+        createdAt: DateTime.now().subtract(Duration(minutes: 5)),
+      ),
+    ];
     init();
   }
 
@@ -170,6 +173,16 @@ class _MyAppState extends State<MyApp> {
           //   scale: CurvedAnimation(parent: animation, curve: Curves.easeIn),
           //   child: item,
           // ),
+          onItemExtraWidget: (item) {
+            if (item == itemWithExtraWidget) {
+              return Column(
+                children: [
+                  Image.asset('assets/flower.png', width: 140, height: 140),
+                ],
+              );
+            }
+            return null;
+          },
           withDateSeparator: true,
           style: ChattyWidgetStyle(
             userColor: Colors.limeAccent,
