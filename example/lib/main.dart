@@ -213,11 +213,16 @@ class _MyAppState extends State<MyApp> {
           withDocuments: true,
           enterDateString: 'Enter the date!',
           documentsString: 'SOURCES:',
-          assistantPersona: Icon(
-            Icons.person_2,
-            size: 40,
-            color: Theme.of(context).colorScheme.inversePrimary,
+          assistantPersona: Image.asset(
+            'assets/buddy1.png',
+            width: 40,
+            height: 40,
           ),
+          // assistantPersona: Icon(
+          //   Icons.person_2,
+          //   size: 40,
+          //   color: Theme.of(context).colorScheme.inversePrimary,
+          // ),
           onDocumentClicked: (doc) {
             showDialog(
               context: context,
