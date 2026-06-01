@@ -24,7 +24,12 @@ class _MyAppState extends State<MyApp> {
   /// The initialItems can be used for a first assistant message or the previous conversation
   late final List<ChattyItem> initialItems;
 
-  final controller = ChattyWidgetController();
+  final controller = ChattyWidgetController(
+    animatedListKey: GlobalKey<AnimatedListState>(),
+  );
+
+  // State for the widget
+  var withDateSeparator = true;
 
   var messageCounter = 0;
   final now = DateTime.now();
@@ -145,7 +150,11 @@ class _MyAppState extends State<MyApp> {
 
   void init() async {
     // Imitate an asynchronous update of the controller.
-    controller.update(items: initialItems);
+    controller.clear(
+      initialItems: initialItems,
+      withDateseparator: withDateSeparator,
+      withNotify: false,
+    );
   }
 
   // This widget is the root of your application.
@@ -156,10 +165,50 @@ class _MyAppState extends State<MyApp> {
         title: Text('Example'),
         actions: [
           IconButton(
-            onPressed: () {
-              controller.update(items: []);
+            onPressed: () async {
+              showDialog<bool?>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  content: Text(
+                    'Are you sure you want to remove all messages?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Cancel'),
+                    ),
+                    FilledButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                      onPressed: () {
+                        controller.clear(withDateseparator: withDateSeparator);
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Remove all items!'),
+                    ),
+                  ],
+                ),
+              );
             },
             icon: Icon(Icons.delete),
+          ),
+          IconButton(
+            onPressed: () {
+              // Open screen for settings.
+              setState(() {
+                withDateSeparator = !withDateSeparator;
+                controller.clear(
+                  withDateseparator: withDateSeparator,
+                  //initialItems: initialItems,
+                );
+              });
+            },
+            icon: Icon(Icons.settings),
           ),
         ],
       ),
@@ -167,10 +216,10 @@ class _MyAppState extends State<MyApp> {
         minimum: EdgeInsets.all(12),
         child: ChattyWidget(
           animated: true,
-          // animationTransition: (item, animation) => ScaleTransition(
-          //   scale: CurvedAnimation(parent: animation, curve: Curves.easeIn),
-          //   child: item,
-          // ),
+          animationTransition: (item, animation) => ScaleTransition(
+            scale: CurvedAnimation(parent: animation, curve: Curves.easeIn),
+            child: item,
+          ),
           onItemExtraWidget: (item) {
             if (item == itemWithExtraWidget) {
               return Column(
@@ -181,7 +230,7 @@ class _MyAppState extends State<MyApp> {
             }
             return null;
           },
-          withDateSeparator: true,
+          withDateSeparator: withDateSeparator,
           style: ChattyWidgetStyle(
             userColor: Colors.limeAccent,
             userBorderColor: Colors.black,
