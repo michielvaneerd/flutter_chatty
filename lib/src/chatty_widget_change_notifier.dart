@@ -5,8 +5,13 @@ class ChattyWidgetChangeNotifier with ChangeNotifier {
   ChattyWidgetState chattyWidgetState;
   ChattyWidgetChangeNotifier(this.chattyWidgetState);
 
-  void update(ChattyWidgetState newChattyWidgetState) {
+  void update(
+    ChattyWidgetState newChattyWidgetState, {
+    bool withNotify = true,
+  }) {
     chattyWidgetState = newChattyWidgetState;
-    notifyListeners();
+    if (withNotify) {
+      notifyListeners();
+    }
   }
 }

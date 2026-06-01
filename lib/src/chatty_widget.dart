@@ -117,14 +117,15 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   }
 
   List<ChattyItem> getFullItems() {
+    final items = _controller.getItems();
     if (!widget.withDateSeparator) {
-      return _controller.notifier.chattyWidgetState.items.toList();
+      return items;
     }
     // Items has the most recent item at index 0
     // So instead of ADDING the date separator to the END of the list BEFORE the first message with a new date
     final List<ChattyItem> newItems = [];
     final Map<DateTime, bool> dates = {};
-    for (final item in _controller.notifier.chattyWidgetState.items.reversed) {
+    for (final item in items.reversed) {
       // We reverse the list, so now the oldest entry is at index 0
       final date = ChattyHelpers.getDate(item.createdAt);
       if (!dates.containsKey(date)) {
@@ -144,46 +145,32 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     // is that the first thing we do is call getFullItems, which always returns a copy of the list!
     // If we didn't return a copy but the original list, we could get into trouble.
 
-    _controller.notifier.update(
-      ChattyWidgetState(
-        items: _controller.notifier.chattyWidgetState.items,
-        busy: true,
-      ),
-    );
+    _controller.update(busy: true);
 
     String? questionName;
 
-    if (_controller.notifier.chattyWidgetState.items.isNotEmpty &&
-        _controller.notifier.chattyWidgetState.items.first.question != null) {
+    var items = _controller.getItems();
+
+    if (items.isNotEmpty && items.first.question != null) {
       // This is an answer to this question. We remove the question from this item,
       // so then it will be a normal assistant message without answering options anymore.
-      questionName =
-          _controller.notifier.chattyWidgetState.items.first.question!.name;
-      // Note: NO update(), so NO notifyListeners. But is not needed here, because below we do this already immediately after this.
-      _controller.notifier.chattyWidgetState.items[0] = _controller
-          .notifier
-          .chattyWidgetState
-          .items
-          .first
-          .copyWith(removeQuestion: true);
+      questionName = items.first.question!.name;
+      items[0] = items.first.copyWith(removeQuestion: true);
     }
 
     // Add the user answer to the items
-    _controller.notifier.chattyWidgetState.items.insert(
-      0,
-      ChattyItem.fromUser(prompt),
-    );
-    _controller.notifier.update(_controller.notifier.chattyWidgetState);
+    items.insert(0, ChattyItem.fromUser(prompt));
+    _controller.update(items: items);
 
     // Add some random delay between adding the user prompt and the assistant "thinking" bubble
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
     // Add the "thinking" assistant message
-    _controller.notifier.chattyWidgetState.items.insert(
+    items.insert(
       0,
       ChattyItem.fromAssistant(''),
     ); // Empty assistant message is thinking
-    _controller.notifier.update(_controller.notifier.chattyWidgetState);
+    _controller.update(items: items);
 
     final response = await widget.onPrompt(
       prompt,
@@ -191,15 +178,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       answerValue: answerValue,
     );
 
-    _controller.notifier.update(
-      ChattyWidgetState(
-        items: _controller.notifier.chattyWidgetState.items
-          ..removeAt(0)
-          ..insert(0, response),
-
-        busy: false,
-      ),
-    );
+    items.removeAt(0);
+    items.insert(0, response);
+    _controller.update(items: items, busy: false);
   }
 
   Widget _getListViewChild({
@@ -293,10 +274,10 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     return Theme(
       data: widget.themeData ?? Theme.of(context),
       child: ListenableBuilder(
-        listenable: _controller.notifier,
+        listenable: _controller.getNotifier(),
         builder: (context, child) {
           final fullItems = getFullItems();
-          final busy = _controller.notifier.chattyWidgetState.busy;
+          final busy = _controller.getBusy();
           final currentItemQuestionHasEmbeddedInput =
               fullItems.isNotEmpty &&
               fullItems.first.question != null &&

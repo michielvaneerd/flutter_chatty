@@ -7,4 +7,11 @@ class ChattyWidgetState extends Equatable {
   const ChattyWidgetState({required this.items, this.busy = false});
   @override
   List<Object?> get props => [items, busy];
+
+  ChattyWidgetState copyWith({List<ChattyItem>? items, bool? busy}) {
+    return ChattyWidgetState(
+      items: items ?? this.items,
+      busy: busy ?? this.busy,
+    );
+  }
 }

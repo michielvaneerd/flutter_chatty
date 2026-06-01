@@ -145,7 +145,7 @@ class _MyAppState extends State<MyApp> {
 
   void init() async {
     // Imitate an asynchronous update of the controller.
-    controller.notifier.update(ChattyWidgetState(items: initialItems));
+    controller.update(items: initialItems);
   }
 
   // This widget is the root of your application.
@@ -157,9 +157,7 @@ class _MyAppState extends State<MyApp> {
         actions: [
           IconButton(
             onPressed: () {
-              controller.notifier.update(
-                ChattyWidgetState(items: [], busy: false),
-              );
+              controller.update(items: []);
             },
             icon: Icon(Icons.delete),
           ),
