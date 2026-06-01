@@ -30,7 +30,6 @@ class ChattyWidgetState {
     }
     final List<ChattyItem> newItems = [];
     final Map<DateTime, bool> dates = {};
-    // TODO: We reverse this list 2 times, check if this can be done without reversing
     for (final item in items.reversed) {
       // We reverse the list, so now the oldest entry is at index 0
       final date = ChattyHelpers.getDate(item.createdAt);

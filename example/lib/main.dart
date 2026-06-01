@@ -4,6 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chatty/flutter_chatty.dart';
 import 'package:intl/intl.dart';
 
+enum ChattyWidgetStyles { empty, playfully, business }
+
+enum ChattyWidetAnimations { fade, scale, rotate }
+
+class ConfigScreenObject {
+  ChattyWidgetStyles styles;
+  bool animated;
+  bool withDateSeparator;
+  ChattyWidetAnimations animation;
+  ConfigScreenObject({
+    required this.animated,
+    required this.styles,
+    required this.withDateSeparator,
+    required this.animation,
+  });
+}
+
 void main() {
   runApp(MaterialApp(home: const MyApp()));
 }
@@ -15,6 +32,144 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+class MyStyleScreen extends StatefulWidget {
+  const MyStyleScreen({
+    super.key,
+    required this.styles,
+    required this.animated,
+    required this.withDateSeparator,
+    required this.animation,
+  });
+  final ChattyWidgetStyles styles;
+  final bool animated;
+  final bool withDateSeparator;
+  final ChattyWidetAnimations animation;
+
+  @override
+  State<MyStyleScreen> createState() => _MyStyleScreenState();
+}
+
+class _MyStyleScreenState extends State<MyStyleScreen> {
+  late ChattyWidgetStyles styles;
+  late bool animated;
+  late bool withDateSeparator;
+  late ChattyWidetAnimations animation;
+
+  @override
+  void initState() {
+    styles = widget.styles;
+    animated = widget.animated;
+    withDateSeparator = widget.withDateSeparator;
+    animation = widget.animation;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Style and configuration'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop<ConfigScreenObject>(
+                ConfigScreenObject(
+                  animated: animated,
+                  styles: styles,
+                  withDateSeparator: withDateSeparator,
+                  animation: animation,
+                ),
+              );
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text('Animated?'),
+            trailing: animated ? Icon(Icons.check) : null,
+            onTap: () {
+              setState(() {
+                animated = !animated;
+              });
+            },
+          ),
+          if (animated) ...[
+            ListTile(
+              title: Text('Fade animation'),
+              trailing: animation == ChattyWidetAnimations.fade
+                  ? Icon(Icons.check)
+                  : null,
+              onTap: () {
+                setState(() {
+                  animation = ChattyWidetAnimations.fade;
+                });
+              },
+            ),
+            ListTile(
+              title: Text('Scale animation'),
+              trailing: animation == ChattyWidetAnimations.scale
+                  ? Icon(Icons.check)
+                  : null,
+              onTap: () {
+                setState(() {
+                  animation = ChattyWidetAnimations.scale;
+                });
+              },
+            ),
+            ListTile(
+              title: Text('Rotate animation'),
+              trailing: animation == ChattyWidetAnimations.rotate
+                  ? Icon(Icons.check)
+                  : null,
+              onTap: () {
+                setState(() {
+                  animation = ChattyWidetAnimations.rotate;
+                });
+              },
+            ),
+          ],
+          ListTile(
+            title: Text('Empty style'),
+            trailing: styles == ChattyWidgetStyles.empty
+                ? Icon(Icons.check)
+                : null,
+            onTap: () {
+              setState(() {
+                styles = ChattyWidgetStyles.empty;
+              });
+            },
+          ),
+          ListTile(
+            title: Text('Playful style'),
+            trailing: styles == ChattyWidgetStyles.playfully
+                ? Icon(Icons.check)
+                : null,
+            onTap: () {
+              setState(() {
+                styles = ChattyWidgetStyles.playfully;
+              });
+            },
+          ),
+          ListTile(
+            title: Text('Business style'),
+            trailing: styles == ChattyWidgetStyles.business
+                ? Icon(Icons.check)
+                : null,
+            onTap: () {
+              setState(() {
+                styles = ChattyWidgetStyles.business;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MyAppState extends State<MyApp> {
   final itemWithExtraWidget = ChattyItem.fromAssistant(
     'I can show a demo of the Flutter Chatty library.\n\nThis message has a custom extra Widget in it.',
@@ -24,12 +179,83 @@ class _MyAppState extends State<MyApp> {
   /// The initialItems can be used for a first assistant message or the previous conversation
   late final List<ChattyItem> initialItems;
 
+  Widget getAnimationByAnimation(Widget child, Animation<double> animation) {
+    switch (_animation) {
+      case ChattyWidetAnimations.fade:
+        return FadeTransition(opacity: animation, child: child);
+      case ChattyWidetAnimations.scale:
+        return ScaleTransition(
+          scale: CurvedAnimation(parent: animation, curve: Curves.easeIn),
+          child: child,
+        );
+      case ChattyWidetAnimations.rotate:
+        return RotationTransition(turns: animation, child: child);
+    }
+  }
+
+  ChattyWidgetStyle getStyleByStyles() {
+    switch (_style) {
+      case ChattyWidgetStyles.empty:
+        return ChattyWidgetStyle();
+      case ChattyWidgetStyles.playfully:
+        return ChattyWidgetStyle(
+          userColor: Colors.amber,
+          assistantColor: Colors.deepOrangeAccent,
+          userBorderColor: Colors.blueGrey,
+          assistantBorderColor: Colors.purple,
+          assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
+          userTextStyle: Theme.of(context).textTheme.bodyLarge,
+          timeStyle: Theme.of(
+            context,
+          ).textTheme.bodySmall!.copyWith(color: Colors.brown),
+          dateStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          borderWidth: 4.0,
+          datePadding: EdgeInsets.all(2),
+          dateBoxDecoration: BoxDecoration(
+            border: Border.all(color: Colors.black),
+            borderRadius: BorderRadius.circular(2),
+            color: Colors.pink,
+          ),
+        );
+      case ChattyWidgetStyles.business:
+        return ChattyWidgetStyle(
+          userColor: Colors.white,
+          assistantColor: Colors.grey.shade100,
+          userBorderColor: Colors.black,
+          assistantBorderColor: Colors.black,
+          assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
+          userTextStyle: Theme.of(context).textTheme.bodyLarge,
+          timeStyle: Theme.of(
+            context,
+          ).textTheme.bodySmall!.copyWith(color: Colors.blue),
+          // dateStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+          //   color: Colors.yellow,
+          //   fontWeight: FontWeight.bold,
+          // ),
+          borderWidth: 1.0,
+          //datePadding: EdgeInsets.all(10),
+          // dateBoxDecoration: BoxDecoration(
+          //   border: Border.all(color: Colors.black),
+          //   borderRadius: BorderRadius.circular(20),
+          //   color: Colors.brown,
+          // ),
+        );
+    }
+  }
+
+  var _style = ChattyWidgetStyles.empty;
+
   final controller = ChattyWidgetController(
     animatedListKey: GlobalKey<AnimatedListState>(),
   );
 
   // State for the widget
   var withDateSeparator = true;
+  var animated = true;
+  var _animation = ChattyWidetAnimations.fade;
 
   var messageCounter = 0;
   final now = DateTime.now();
@@ -198,15 +424,37 @@ class _MyAppState extends State<MyApp> {
             icon: Icon(Icons.delete),
           ),
           IconButton(
-            onPressed: () {
-              // Open screen for settings.
-              setState(() {
-                withDateSeparator = !withDateSeparator;
-                controller.clear(
-                  withDateseparator: withDateSeparator,
-                  //initialItems: initialItems,
-                );
-              });
+            onPressed: () async {
+              final newConfigScreenObject = await Navigator.of(context)
+                  .push<ConfigScreenObject?>(
+                    MaterialPageRoute(
+                      builder: (context) => MyStyleScreen(
+                        styles: _style,
+                        animated: animated,
+                        withDateSeparator: withDateSeparator,
+                        animation: _animation,
+                      ),
+                    ),
+                  );
+              if (newConfigScreenObject != null) {
+                final hasConfigChange =
+                    withDateSeparator !=
+                        newConfigScreenObject.withDateSeparator ||
+                    animated != newConfigScreenObject.animated;
+                setState(() {
+                  _style = newConfigScreenObject.styles;
+                  animated = newConfigScreenObject.animated;
+                  withDateSeparator = newConfigScreenObject.withDateSeparator;
+                  _animation = newConfigScreenObject.animation;
+                });
+                // Note that when the config changes, you MUST call controller.clear, otherwise the item count is not correct anymore
+                if (hasConfigChange) {
+                  controller.clear(
+                    withDateseparator: withDateSeparator,
+                    initialItems: initialItems,
+                  );
+                }
+              }
             },
             icon: Icon(Icons.settings),
           ),
@@ -215,11 +463,10 @@ class _MyAppState extends State<MyApp> {
       body: SafeArea(
         minimum: EdgeInsets.all(12),
         child: ChattyWidget(
-          animated: true,
-          animationTransition: (item, animation) => ScaleTransition(
-            scale: CurvedAnimation(parent: animation, curve: Curves.easeIn),
-            child: item,
-          ),
+          animated: animated,
+          animationTransition: (item, animation) {
+            return getAnimationByAnimation(item, animation);
+          },
           onItemExtraWidget: (item) {
             if (item == itemWithExtraWidget) {
               return Column(
@@ -231,27 +478,7 @@ class _MyAppState extends State<MyApp> {
             return null;
           },
           withDateSeparator: withDateSeparator,
-          style: ChattyWidgetStyle(
-            userColor: Colors.limeAccent,
-            userBorderColor: Colors.black,
-            assistantBorderColor: Colors.deepPurple,
-            assistantTextStyle: Theme.of(context).textTheme.bodyLarge,
-            userTextStyle: Theme.of(context).textTheme.bodyLarge,
-            timeStyle: Theme.of(
-              context,
-            ).textTheme.bodySmall!.copyWith(color: Colors.blue),
-            dateStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
-              color: Colors.yellow,
-              fontWeight: FontWeight.bold,
-            ),
-            borderWidth: 2.0,
-            datePadding: EdgeInsets.all(10),
-            dateBoxDecoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.brown,
-            ),
-          ),
+          style: getStyleByStyles(),
           // themeData: ThemeData(
           //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
           // ),
