@@ -6,7 +6,6 @@ import 'package:flutter_chatty/src/chatty_widget_change_notifier.dart';
 class ChattyWidgetController {
   ChattyWidgetController({
     List<ChattyItem>? initialItems,
-    this.animatedListKey,
     bool withDateseparator = false,
   }) : _notifier = ChattyWidgetChangeNotifier(
          ChattyWidgetState.fromInitialItems(
@@ -19,7 +18,12 @@ class ChattyWidgetController {
   final ChattyWidgetChangeNotifier _notifier;
 
   /// Only needed if you have animated = true.
-  final GlobalKey<AnimatedListState>? animatedListKey;
+  GlobalKey<AnimatedListState>? _animatedListKey;
+
+  GlobalKey<AnimatedListState> getAnimatedListKey() {
+    _animatedListKey ??= GlobalKey<AnimatedListState>();
+    return _animatedListKey!;
+  }
 
   void dispose() {
     _notifier.dispose();
@@ -42,7 +46,7 @@ class ChattyWidgetController {
 
   void insertAt(int index, ChattyItem item, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.insert(index, item);
-    animatedListKey?.currentState?.insertItem(index);
+    getAnimatedListKey().currentState?.insertItem(index);
     if (withNotify) {
       _notifier.notify();
     }
@@ -50,7 +54,7 @@ class ChattyWidgetController {
 
   void removeAt(int index, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.removeAt(index);
-    animatedListKey?.currentState?.removeItem(
+    getAnimatedListKey().currentState?.removeItem(
       index,
       (context, animation) => SizedBox.shrink(),
     );
@@ -93,10 +97,10 @@ class ChattyWidgetController {
       initialItems ?? [],
       withDateSeparator: withDateseparator,
     );
-    animatedListKey?.currentState?.removeAllItems(
+    getAnimatedListKey().currentState?.removeAllItems(
       (context, animation) => SizedBox.shrink(),
     );
-    animatedListKey?.currentState?.insertAllItems(
+    getAnimatedListKey().currentState?.insertAllItems(
       0,
       newChattyWidgetState.initialItemCount,
     );

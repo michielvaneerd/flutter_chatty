@@ -248,9 +248,7 @@ class _MyAppState extends State<MyApp> {
 
   var _style = ChattyWidgetStyles.empty;
 
-  final controller = ChattyWidgetController(
-    animatedListKey: GlobalKey<AnimatedListState>(),
-  );
+  final controller = ChattyWidgetController();
 
   // State for the widget
   var withDateSeparator = true;

@@ -84,6 +84,8 @@ final controller = ChattyWidgetController(
   ],
 );
 
+If you don't set a `ChattyWidgetController`, it will be created internally.
+
 // In your widget tree:
 ChattyWidget(
   onPrompt: onPrompt,
@@ -93,7 +95,7 @@ ChattyWidget(
 // Clear conversation:
 controller.update(items: []);
 
-// Don't forget to dispose when done:
+// Don't forget to dispose when done (only when you created the `ChattyWidgetController` yourself!):
 controller.dispose();
 ```
 
@@ -225,7 +227,7 @@ ChattyWidget(
 
 ### Animations
 
-Enable fade-in animations for new messages:
+Enable animations for new messages:
 
 ```dart
 ChattyWidget(

@@ -96,7 +96,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   void initState() {
     if (widget.controller == null) {
       _controller = ChattyWidgetController(
-        animatedListKey: GlobalKey<AnimatedListState>(),
         withDateseparator: widget.withDateSeparator,
       );
     } else {
@@ -190,7 +189,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     if (widget.animated) {
       return AnimatedList.separated(
         reverse: true,
-        key: _controller.animatedListKey,
+        key: _controller.getAnimatedListKey(),
         initialItemCount: _controller.getInitialItemCount(),
         itemBuilder: (context, index, animation) {
           // if (index >= fullItems.length) {
