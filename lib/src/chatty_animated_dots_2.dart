@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chatty/flutter_chatty.dart';
 
 class ChattyAnimatedDots2 extends StatefulWidget {
-  const ChattyAnimatedDots2({super.key});
+  const ChattyAnimatedDots2({super.key, required this.style});
+  final ChattyWidgetStyle style;
 
   @override
   State<ChattyAnimatedDots2> createState() => _ChattyAnimatedDots2State();
@@ -48,7 +49,9 @@ class _ChattyAnimatedDots2State extends State<ChattyAnimatedDots2>
       height: 10,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.black,
+        color:
+            widget.style.thinkingDotsColor ??
+            Theme.of(context).colorScheme.secondary,
       ),
     );
   }

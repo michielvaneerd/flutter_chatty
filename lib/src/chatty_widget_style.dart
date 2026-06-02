@@ -44,12 +44,16 @@ class ChattyWidgetStyle {
   /// Border color for assistant responses
   final Color? assistantBorderColor;
 
+  /// The color of the "thinking" assistant dots
+  final Color? thinkingDotsColor;
+
   /// Padding for the assistant responses
   final EdgeInsets? assistantPadding;
   const ChattyWidgetStyle({
     this.userTextStyle,
     this.assistantTextStyle,
     this.documentsLinkStyle,
+    this.thinkingDotsColor,
     this.documentsStringStyle,
     this.timeStyle,
     this.borderWidth,

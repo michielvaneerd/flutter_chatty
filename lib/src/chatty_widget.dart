@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_chatty/flutter_chatty.dart';
-import 'package:flutter_chatty/src/chatty_animated_dots.dart';
 import 'package:flutter_chatty/src/chatty_animated_dots_2.dart';
 import 'package:flutter_chatty/src/chatty_date_separator.dart';
 import 'package:flutter_chatty/src/chatty_item_widget.dart';
@@ -136,8 +135,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     // Add the user answer to the items
     _controller.insertAt(0, ChattyItem.fromUser(prompt));
 
-    // Add some random delay between adding the user prompt and the assistant "thinking" bubble
-    await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
+    // Add some random delay between adding the user prompt and the assistant "thinking" bubble,
+    // that way it looks more natural and we can first see the user prompt appear and then the assistant "thinking" bubble.
+    await Future.delayed(Duration(milliseconds: Random().nextInt(1000) + 300));
 
     if (answer?.actionBefore != null) {
       await answer!.actionBefore!();
@@ -145,7 +145,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
     _controller.insertAt(0, ChattyItem.fromAssistant(''));
 
-    await Future.delayed(Duration(seconds: 2));
+    // await Future.delayed(Duration(seconds: 2));
 
     final response = await widget.onPrompt(
       prompt,
@@ -188,9 +188,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 busy &&
                 item.source == ChattyItemSource.assistant &&
                 item.content.isEmpty
-            ? ChattyAnimatedDots2(
-                //textStyle: TextStyle(fontWeight: FontWeight.bold),
-              )
+            ? ChattyAnimatedDots2(style: widget.style)
             : extraWidget,
       );
     }

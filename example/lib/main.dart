@@ -68,6 +68,7 @@ class _MyAppState extends State<MyApp> {
       case ChattyWidgetStyles.playfully:
         return ChattyWidgetStyle(
           userColor: Colors.amber,
+          thinkingDotsColor: Colors.purple,
           assistantColor: Colors.deepOrangeAccent,
           userBorderColor: Colors.blueGrey,
           assistantBorderColor: Colors.purple,
