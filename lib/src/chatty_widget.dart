@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chatty/flutter_chatty.dart';
 import 'package:flutter_chatty/src/chatty_animated_dots.dart';
+import 'package:flutter_chatty/src/chatty_animated_dots_2.dart';
 import 'package:flutter_chatty/src/chatty_date_separator.dart';
 import 'package:flutter_chatty/src/chatty_item_widget.dart';
 
@@ -144,6 +145,8 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
     _controller.insertAt(0, ChattyItem.fromAssistant(''));
 
+    await Future.delayed(Duration(seconds: 2));
+
     final response = await widget.onPrompt(
       prompt,
       questionName: question?.name,
@@ -185,8 +188,8 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 busy &&
                 item.source == ChattyItemSource.assistant &&
                 item.content.isEmpty
-            ? ChattyAnimatedDots(
-                textStyle: TextStyle(fontWeight: FontWeight.bold),
+            ? ChattyAnimatedDots2(
+                //textStyle: TextStyle(fontWeight: FontWeight.bold),
               )
             : extraWidget,
       );
