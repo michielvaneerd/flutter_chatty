@@ -109,19 +109,27 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   void prompt(String prompt, {String? answerValue}) async {
     _controller.setBusy(true);
 
-    String? questionName;
+    ChattyQuestion? question;
+    ChattyAnswer? answer;
 
     var items = _controller.getItems();
 
     if (items.isNotEmpty && items.first.question != null) {
       // This is an answer to this question. We remove the question from this item,
       // so then it will be a normal assistant message without answering options anymore.
-      questionName = items.first.question!.name;
+      question = items.first.question!;
       _controller.replaceAt(
         0,
         items.first.copyWith(removeQuestion: true),
         withNotify: false,
       );
+      if (question.answers != null) {
+        try {
+          answer = question.answers?.firstWhere((e) => e.value == answerValue);
+        } catch (ex) {
+          // Nothing to do.
+        }
+      }
     }
 
     // Add the user answer to the items
@@ -130,16 +138,24 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     // Add some random delay between adding the user prompt and the assistant "thinking" bubble
     await Future.delayed(Duration(milliseconds: Random().nextInt(1000)));
 
+    if (answer?.actionBefore != null) {
+      await answer!.actionBefore!();
+    }
+
     _controller.insertAt(0, ChattyItem.fromAssistant(''));
 
     final response = await widget.onPrompt(
       prompt,
-      questionName: questionName,
+      questionName: question?.name,
       answerValue: answerValue,
     );
 
     _controller.setBusy(false, withNotify: false);
     _controller.replaceAt(0, response);
+
+    if (answer?.actionAfter != null) {
+      await answer!.actionAfter!();
+    }
   }
 
   Widget _getListViewChild({

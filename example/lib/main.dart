@@ -140,15 +140,9 @@ class _MyAppState extends State<MyApp> {
     messageCounter += 1;
 
     if (questionName != null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Received answer for question $questionName: answer = $prompt and value = $answerValue',
-            ),
-          ),
-        );
-      }
+      debugPrint(
+        'Received answer for question $questionName: answer = $prompt and value = $answerValue',
+      );
     }
 
     switch (messageCounter) {
@@ -194,7 +188,27 @@ class _MyAppState extends State<MyApp> {
             name: 'yes_no',
             type: ChattyQuestionType.singleChoice,
             answers: [
-              ChattyAnswer(value: 'yes', content: 'Yes'),
+              ChattyAnswer(
+                value: 'yes',
+                content: 'Yes',
+                actionBefore: () async {
+                  // An action for this answer. Can be used to do something like opening another screen.
+                  await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      content: Text('This is an action from the YES answer'),
+                      actions: [
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
               ChattyAnswer(value: 'no', content: 'No'),
             ],
           ),

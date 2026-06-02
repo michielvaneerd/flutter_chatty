@@ -23,9 +23,20 @@ class ChattyDocument extends Equatable {
 class ChattyAnswer extends Equatable {
   final String value;
   final String content;
-  const ChattyAnswer({required this.value, required this.content});
+
+  /// Callback that is called when this answer is chosen *before* this answer is posted
+  final Future Function()? actionBefore;
+
+  /// Callback that is called when this answer is chosen *after* this answer is posted and the response is displayed
+  final Future Function()? actionAfter;
+  const ChattyAnswer({
+    required this.value,
+    required this.content,
+    this.actionBefore,
+    this.actionAfter,
+  });
   @override
-  List<Object?> get props => [value, content];
+  List<Object?> get props => [value, content, actionBefore, actionAfter];
 }
 
 class ChattyQuestion extends Equatable {
