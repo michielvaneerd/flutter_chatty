@@ -127,8 +127,19 @@ ChattyItem.fromAssistant(
     name: 'agreement',
     type: ChattyQuestionType.singleChoice,
     answers: [
-      ChattyAnswer(value: 'yes', content: 'Yes'),
-      ChattyAnswer(value: 'no', content: 'No'),
+      ChattyAnswer(value: 'yes', content: 'Yes', actionBefore: () async {
+        // Do some stuff, maybe redirect user to another screen where some text needs to be approved
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => ApproveScreen()
+        ));
+        // After this screen is closed, the YES answer is posted to the backend.
+        // So there you can check if the approval went well and generate a correct response.
+      }),
+      ChattyAnswer(value: 'no', content: 'No', actionAfter: () async {
+        // Do some stuff, maybe display an alert...
+        // At this point the answer has been posted and the response has been displayed.
+        print('You answered no...');
+      }),
     ],
   ),
 );
