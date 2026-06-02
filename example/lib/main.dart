@@ -251,8 +251,8 @@ class _MyAppState extends State<MyApp> {
   final controller = ChattyWidgetController();
 
   // State for the widget
-  var withDateSeparator = true;
-  var animated = true;
+  var withDateSeparator = ChattyWidgetController.defaultWithDateSeparator;
+  var animated = ChattyWidgetController.defaultAnimated;
   var _animation = ChattyWidetAnimations.fade;
 
   var messageCounter = 0;
@@ -376,7 +376,8 @@ class _MyAppState extends State<MyApp> {
     // Imitate an asynchronous update of the controller.
     controller.clear(
       initialItems: initialItems,
-      withDateseparator: withDateSeparator,
+      withDateSeparator: withDateSeparator,
+      animated: animated,
       withNotify: false,
     );
   }
@@ -410,7 +411,7 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       onPressed: () {
-                        controller.clear(withDateseparator: withDateSeparator);
+                        controller.clear();
                         Navigator.of(context).pop();
                       },
                       child: Text('Remove all items!'),
@@ -448,7 +449,8 @@ class _MyAppState extends State<MyApp> {
                 // Note that when the config changes, you MUST call controller.clear, otherwise the item count is not correct anymore
                 if (hasConfigChange) {
                   controller.clear(
-                    withDateseparator: withDateSeparator,
+                    withDateSeparator: withDateSeparator,
+                    animated: animated,
                     initialItems: initialItems,
                   );
                 }
@@ -461,7 +463,6 @@ class _MyAppState extends State<MyApp> {
       body: SafeArea(
         minimum: EdgeInsets.all(12),
         child: ChattyWidget(
-          animated: animated,
           animationTransition: (item, animation) {
             return getAnimationByAnimation(item, animation);
           },
@@ -475,7 +476,6 @@ class _MyAppState extends State<MyApp> {
             }
             return null;
           },
-          withDateSeparator: withDateSeparator,
           style: getStyleByStyles(),
           // themeData: ThemeData(
           //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),

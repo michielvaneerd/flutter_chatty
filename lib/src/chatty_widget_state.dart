@@ -10,7 +10,7 @@ class ChattyWidgetState {
   ChattyWidgetState({
     this.items = const [],
     this.busy = false,
-    this.withDateSeparator = false,
+    required this.withDateSeparator,
   });
 
   factory ChattyWidgetState.fromInitialItems(

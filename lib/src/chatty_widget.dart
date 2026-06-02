@@ -12,7 +12,6 @@ class ChattyWidget extends StatefulWidget {
     super.key,
     required this.onPrompt,
     this.withDocuments = false,
-    this.withDateSeparator = false,
     this.themeData,
     this.onDocumentClicked,
     this.promptPlaceHolder,
@@ -23,7 +22,6 @@ class ChattyWidget extends StatefulWidget {
     this.style = const ChattyWidgetStyle(),
     this.controller,
     this.onItemExtraWidget,
-    this.animated = false,
     this.animationTransition,
   });
 
@@ -31,9 +29,6 @@ class ChattyWidget extends StatefulWidget {
   static const paddingSmall = 6.0;
   static const paddingBig = 24.0;
   static const borderRadiusDefault = 18.0;
-
-  /// Whether the new items should have a fade in animation.
-  final bool animated;
 
   /// Optional custom transition for animated lists. Make sure to return a transition instance with the item as the child
   final Widget Function(Widget item, Animation<double> animation)?
@@ -53,9 +48,6 @@ class ChattyWidget extends StatefulWidget {
     String? answerValue,
   })
   onPrompt;
-
-  /// Whether to display the date above the items (one for each date)
-  final bool withDateSeparator;
 
   /// Whether the textfield should be disabled.
   final bool promptTextFieldDisabled;
@@ -90,14 +82,14 @@ class ChattyWidget extends StatefulWidget {
 
 class _ChattyWidgetState extends State<ChattyWidget> {
   final promptController = TextEditingController();
+
+  // A ChattyWidgetController can be given by the caller or else it will be created here
   late final ChattyWidgetController _controller;
 
   @override
   void initState() {
     if (widget.controller == null) {
-      _controller = ChattyWidgetController(
-        withDateseparator: widget.withDateSeparator,
-      );
+      _controller = ChattyWidgetController();
     } else {
       _controller = widget.controller!;
     }
@@ -186,7 +178,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   }
 
   Widget _getListView(List<ChattyItem> fullItems, bool busy) {
-    if (widget.animated) {
+    if (_controller.animated) {
       return AnimatedList.separated(
         reverse: true,
         key: _controller.getAnimatedListKey(),

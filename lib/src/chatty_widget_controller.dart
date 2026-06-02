@@ -2,22 +2,30 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_chatty/flutter_chatty.dart';
 import 'package:flutter_chatty/src/chatty_widget_change_notifier.dart';
 
-/// Controller that mutates the ChattyWidgetState and does action on the GlobalKey and then call the notifyListeners on the ChattyWidgetChangeNotifier
+/// Controller that mutates the ChattyWidgetState and does action on the GlobalKey and then call the notifyListeners on the ChattyWidgetChangeNotifier.
+/// Because it manages the items, it needs to have the animated and withDateSeparator properties, because these impact on how to manage the items.
 class ChattyWidgetController {
   ChattyWidgetController({
     List<ChattyItem>? initialItems,
-    bool withDateseparator = false,
+    this.withDateSeparator = defaultWithDateSeparator,
+    this.animated = defaultAnimated,
   }) : _notifier = ChattyWidgetChangeNotifier(
-         ChattyWidgetState.fromInitialItems(
-           initialItems ?? [],
-           withDateSeparator: withDateseparator,
-         ),
+         ChattyWidgetState.fromInitialItems(initialItems ?? []),
        );
+
+  static const defaultAnimated = true;
+  static const defaultWithDateSeparator = true;
+
+  /// Whether new chat messages should be animated
+  bool animated;
+
+  /// Whether the date should be displayed
+  bool withDateSeparator;
 
   // Clean list with only messages and NO extra items like dateSeparator
   final ChattyWidgetChangeNotifier _notifier;
 
-  /// Only needed if you have animated = true.
+  /// Only needed if animated = true.
   GlobalKey<AnimatedListState>? _animatedListKey;
 
   GlobalKey<AnimatedListState> getAnimatedListKey() {
@@ -46,7 +54,9 @@ class ChattyWidgetController {
 
   void insertAt(int index, ChattyItem item, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.insert(index, item);
-    getAnimatedListKey().currentState?.insertItem(index);
+    if (animated) {
+      getAnimatedListKey().currentState?.insertItem(index);
+    }
     if (withNotify) {
       _notifier.notify();
     }
@@ -54,10 +64,12 @@ class ChattyWidgetController {
 
   void removeAt(int index, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.removeAt(index);
-    getAnimatedListKey().currentState?.removeItem(
-      index,
-      (context, animation) => SizedBox.shrink(),
-    );
+    if (animated) {
+      getAnimatedListKey().currentState?.removeItem(
+        index,
+        (context, animation) => SizedBox.shrink(),
+      );
+    }
     if (withNotify) {
       _notifier.notify();
     }
@@ -87,23 +99,32 @@ class ChattyWidgetController {
   }
 
   /// Clears all items and optionally sets a new list of items
-  /// This is also the only place to change the withDateseparator property
   void clear({
     List<ChattyItem>? initialItems,
-    bool withDateseparator = false,
+    bool? withDateSeparator,
+    bool? animated,
     bool withNotify = true,
   }) {
+    if (animated != null) {
+      this.animated = animated;
+    }
+    if (withDateSeparator != null) {
+      this.withDateSeparator = withDateSeparator;
+    }
+
     final newChattyWidgetState = ChattyWidgetState.fromInitialItems(
       initialItems ?? [],
-      withDateSeparator: withDateseparator,
+      withDateSeparator: this.withDateSeparator,
     );
-    getAnimatedListKey().currentState?.removeAllItems(
-      (context, animation) => SizedBox.shrink(),
-    );
-    getAnimatedListKey().currentState?.insertAllItems(
-      0,
-      newChattyWidgetState.initialItemCount,
-    );
+    if (this.animated) {
+      getAnimatedListKey().currentState?.removeAllItems(
+        (context, animation) => SizedBox.shrink(),
+      );
+      getAnimatedListKey().currentState?.insertAllItems(
+        0,
+        newChattyWidgetState.initialItemCount,
+      );
+    }
     _notifier.chattyWidgetState = newChattyWidgetState;
     if (withNotify) {
       _notifier.notify();
