@@ -153,6 +153,8 @@ class ChattyItemWidget extends StatelessWidget {
           children: [
             FilledButton(
               style: style.answerButtonStyle,
+              onLongPress:
+                  () {}, // Disables the longPress to bubble up to the parent
               onPressed: () async {
                 final minDate = item.question?.min != null
                     ? dateFormat.parse(item.question!.min!)
@@ -185,6 +187,8 @@ class ChattyItemWidget extends StatelessWidget {
               .map(
                 (e) => FilledButton(
                   style: style.answerButtonStyle,
+                  onLongPress:
+                      () {}, // Disables the longPress to bubble up to the parent
                   onPressed: () {
                     onPrompt(e.content, answerValue: e.value);
                   },
