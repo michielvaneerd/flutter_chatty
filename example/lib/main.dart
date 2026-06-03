@@ -81,6 +81,11 @@ class _MyAppState extends State<MyApp> {
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
+          answerButtonStyle: ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(
+              Theme.of(context).colorScheme.tertiary,
+            ),
+          ),
           borderWidth: 4.0,
           datePadding: EdgeInsets.all(2),
           dateBoxDecoration: BoxDecoration(

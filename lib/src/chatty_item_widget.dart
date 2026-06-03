@@ -152,6 +152,7 @@ class ChattyItemWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FilledButton(
+              style: style.answerButtonStyle,
               onPressed: () async {
                 final minDate = item.question?.min != null
                     ? dateFormat.parse(item.question!.min!)
@@ -183,6 +184,7 @@ class ChattyItemWidget extends StatelessWidget {
           children: item.question!.answers!
               .map(
                 (e) => FilledButton(
+                  style: style.answerButtonStyle,
                   onPressed: () {
                     onPrompt(e.content, answerValue: e.value);
                   },
@@ -227,25 +229,7 @@ class ChattyItemWidget extends StatelessWidget {
                   children: [
                     SizedBox(width: _BubbleTail.tailWidth),
                     Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(
-                            ChattyWidget.borderRadiusDefault,
-                          ),
-                          topLeft: Radius.circular(
-                            ChattyWidget.borderRadiusDefault,
-                          ),
-                          bottomRight: isAssistant
-                              ? Radius.circular(
-                                  ChattyWidget.borderRadiusDefault,
-                                )
-                              : Radius.zero,
-                          bottomLeft: !isAssistant
-                              ? Radius.circular(
-                                  ChattyWidget.borderRadiusDefault,
-                                )
-                              : Radius.zero,
-                        ),
+                      child: GestureDetector(
                         onLongPress: onLongPress != null
                             ? () {
                                 onLongPress!(item);

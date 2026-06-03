@@ -47,6 +47,9 @@ class ChattyWidgetStyle {
   /// The color of the "thinking" assistant dots
   final Color? thinkingDotsColor;
 
+  /// The button style for the single choice and date questions
+  final ButtonStyle? answerButtonStyle;
+
   /// Padding for the assistant responses
   final EdgeInsets? assistantPadding;
   const ChattyWidgetStyle({
@@ -54,6 +57,7 @@ class ChattyWidgetStyle {
     this.assistantTextStyle,
     this.documentsLinkStyle,
     this.thinkingDotsColor,
+    this.answerButtonStyle,
     this.documentsStringStyle,
     this.timeStyle,
     this.borderWidth,
