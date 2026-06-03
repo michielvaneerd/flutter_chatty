@@ -115,6 +115,8 @@ class ChattyItemWidget extends StatelessWidget {
     this.assistantPersona,
     required this.documentsString,
     required this.enterDateString,
+    this.onLongPress,
+    this.onTap,
     this.style = const ChattyWidgetStyle(),
   });
   final ChattyItem item;
@@ -126,6 +128,8 @@ class ChattyItemWidget extends StatelessWidget {
   final String enterDateString;
   final ChattyWidgetStyle style;
   final void Function(String prompt, {String? answerValue}) onPrompt;
+  final void Function(ChattyItem item)? onLongPress;
+  final void Function(ChattyItem item)? onTap;
 
   static final dateFormat = DateFormat('y-MM-dd');
 
@@ -223,137 +227,168 @@ class ChattyItemWidget extends StatelessWidget {
                   children: [
                     SizedBox(width: _BubbleTail.tailWidth),
                     Expanded(
-                      child: Container(
-                        padding:
-                            padding ??
-                            EdgeInsets.only(
-                              top: ChattyWidget.paddingDefault,
-                              left: ChattyWidget.paddingDefault,
-                              right: ChattyWidget.paddingDefault,
-                              bottom: ChattyWidget.paddingSmall,
-                            ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(
-                              ChattyWidget.borderRadiusDefault,
-                            ),
-                            topLeft: Radius.circular(
-                              ChattyWidget.borderRadiusDefault,
-                            ),
-                            bottomRight: isAssistant
-                                ? Radius.circular(
-                                    ChattyWidget.borderRadiusDefault,
-                                  )
-                                : Radius.zero,
-                            bottomLeft: !isAssistant
-                                ? Radius.circular(
-                                    ChattyWidget.borderRadiusDefault,
-                                  )
-                                : Radius.zero,
+                      child: InkWell(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(
+                            ChattyWidget.borderRadiusDefault,
                           ),
-                          color: isAssistant ? assistantColor : userColor,
-                          border: style.borderWidth != null
-                              ? Border.all(
-                                  width: style.borderWidth!,
-                                  color: isAssistant
-                                      ? assistantBorderColor
-                                      : userBorderColor,
+                          topLeft: Radius.circular(
+                            ChattyWidget.borderRadiusDefault,
+                          ),
+                          bottomRight: isAssistant
+                              ? Radius.circular(
+                                  ChattyWidget.borderRadiusDefault,
                                 )
-                              : null,
+                              : Radius.zero,
+                          bottomLeft: !isAssistant
+                              ? Radius.circular(
+                                  ChattyWidget.borderRadiusDefault,
+                                )
+                              : Radius.zero,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              spacing: ChattyWidget.paddingDefault,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (mainText.isNotEmpty)
-                                  ChattyRichText(
-                                    text: mainText,
-                                    textStyle: isAssistant
-                                        ? style.assistantTextStyle
-                                        : style.userTextStyle,
-                                  ),
-                                ?getAnswers(context),
-                                ?extraWidget,
-                                if (withDocuments &&
-                                    item.documents != null &&
-                                    item.documents!.isNotEmpty)
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        documentsString,
-                                        style:
-                                            style.documentsStringStyle ??
-                                            (style.assistantTextStyle ??
-                                                    TextStyle())
-                                                .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                      ),
-                                      ...item.documents!.map(
-                                        (e) => InkWell(
-                                          onTap: onDocumentClicked != null
-                                              ? () {
-                                                  onDocumentClicked!(e);
-                                                }
-                                              : null,
-                                          child: Text(
-                                            e.title,
-                                            style:
-                                                style.documentsLinkStyle ??
-                                                (style.assistantTextStyle ??
-                                                        TextStyle())
-                                                    .copyWith(
-                                                      decoration: TextDecoration
-                                                          .underline,
-                                                    ),
+                        onLongPress: onLongPress != null
+                            ? () {
+                                onLongPress!(item);
+                              }
+                            : null,
+                        onTap: onTap != null
+                            ? () {
+                                onTap!(item);
+                              }
+                            : null,
+                        child: Container(
+                          padding:
+                              padding ??
+                              EdgeInsets.only(
+                                top: ChattyWidget.paddingDefault,
+                                left: ChattyWidget.paddingDefault,
+                                right: ChattyWidget.paddingDefault,
+                                bottom: ChattyWidget.paddingSmall,
+                              ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(
+                                ChattyWidget.borderRadiusDefault,
+                              ),
+                              topLeft: Radius.circular(
+                                ChattyWidget.borderRadiusDefault,
+                              ),
+                              bottomRight: isAssistant
+                                  ? Radius.circular(
+                                      ChattyWidget.borderRadiusDefault,
+                                    )
+                                  : Radius.zero,
+                              bottomLeft: !isAssistant
+                                  ? Radius.circular(
+                                      ChattyWidget.borderRadiusDefault,
+                                    )
+                                  : Radius.zero,
+                            ),
+                            color: isAssistant ? assistantColor : userColor,
+                            border: style.borderWidth != null
+                                ? Border.all(
+                                    width: style.borderWidth!,
+                                    color: isAssistant
+                                        ? assistantBorderColor
+                                        : userBorderColor,
+                                  )
+                                : null,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                spacing: ChattyWidget.paddingDefault,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (mainText.isNotEmpty)
+                                    ChattyRichText(
+                                      text: mainText,
+                                      textStyle: isAssistant
+                                          ? style.assistantTextStyle
+                                          : style.userTextStyle,
+                                    ),
+                                  ?getAnswers(context),
+                                  ?extraWidget,
+                                  if (withDocuments &&
+                                      item.documents != null &&
+                                      item.documents!.isNotEmpty)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          documentsString,
+                                          style:
+                                              style.documentsStringStyle ??
+                                              (style.assistantTextStyle ??
+                                                      TextStyle())
+                                                  .copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                        ),
+                                        ...item.documents!.map(
+                                          (e) => InkWell(
+                                            onTap: onDocumentClicked != null
+                                                ? () {
+                                                    onDocumentClicked!(e);
+                                                  }
+                                                : null,
+                                            child: Text(
+                                              e.title,
+                                              style:
+                                                  style.documentsLinkStyle ??
+                                                  (style.assistantTextStyle ??
+                                                          TextStyle())
+                                                      .copyWith(
+                                                        decoration:
+                                                            TextDecoration
+                                                                .underline,
+                                                      ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                if (item.error != null)
-                                  Row(
-                                    spacing: ChattyWidget.paddingDefault,
-                                    children: [
-                                      Icon(
-                                        Icons.warning,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.error,
-                                      ),
-                                      Flexible(
-                                        child: Text(
-                                          item.error!,
-                                          //style: TextStyle(color: )
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                              ],
-                            ),
-                            Align(
-                              alignment: AlignmentGeometry.bottomEnd,
-                              child: Text(
-                                DateFormat.Hm().format(item.createdAt),
-                                style:
-                                    style.timeStyle ??
-                                    (style.assistantTextStyle ?? TextStyle())
-                                        .copyWith(
-                                          fontSize: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall!.fontSize,
+                                      ],
+                                    ),
+                                  if (item.error != null)
+                                    Row(
+                                      spacing: ChattyWidget.paddingDefault,
+                                      children: [
+                                        Icon(
+                                          Icons.warning,
                                           color: Theme.of(
                                             context,
-                                          ).colorScheme.secondary,
+                                          ).colorScheme.error,
                                         ),
+                                        Flexible(
+                                          child: Text(
+                                            item.error!,
+                                            //style: TextStyle(color: )
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
                               ),
-                            ),
-                          ],
+                              Align(
+                                alignment: AlignmentGeometry.bottomEnd,
+                                child: Text(
+                                  DateFormat.Hm().format(item.createdAt),
+                                  style:
+                                      style.timeStyle ??
+                                      (style.assistantTextStyle ?? TextStyle())
+                                          .copyWith(
+                                            fontSize: Theme.of(
+                                              context,
+                                            ).textTheme.labelSmall!.fontSize,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.secondary,
+                                          ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

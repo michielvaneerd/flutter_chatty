@@ -23,6 +23,8 @@ class ChattyWidget extends StatefulWidget {
     this.controller,
     this.onItemExtraWidget,
     this.animationTransition,
+    this.onItemLongPress,
+    this.onItemTap,
   });
 
   static const paddingDefault = 12.0;
@@ -75,6 +77,9 @@ class ChattyWidget extends StatefulWidget {
 
   /// Assistant persona icon
   final Widget? assistantPersona;
+
+  final void Function(ChattyItem item)? onItemLongPress;
+  final void Function(ChattyItem item)? onItemTap;
 
   @override
   State<ChattyWidget> createState() => _ChattyWidgetState();
@@ -183,6 +188,8 @@ class _ChattyWidgetState extends State<ChattyWidget> {
         assistantPersona: widget.assistantPersona,
         onDocumentClicked: widget.onDocumentClicked,
         withDocuments: widget.withDocuments,
+        onLongPress: widget.onItemLongPress,
+        onTap: widget.onItemTap,
         extraWidget:
             index == 0 &&
                 busy &&
@@ -201,9 +208,6 @@ class _ChattyWidgetState extends State<ChattyWidget> {
         key: _controller.getAnimatedListKey(),
         initialItemCount: _controller.getInitialItemCount(),
         itemBuilder: (context, index, animation) {
-          // if (index >= fullItems.length) {
-          //   return const SizedBox.shrink();
-          // }
           final child = _getListViewChild(
             context: context,
             index: index,

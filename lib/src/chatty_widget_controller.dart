@@ -62,6 +62,13 @@ class ChattyWidgetController {
     }
   }
 
+  void remove(ChattyItem item, {bool withNotify = true}) {
+    final index = _notifier.chattyWidgetState.items.indexOf(item);
+    if (index != -1) {
+      removeAt(index, withNotify: withNotify);
+    }
+  }
+
   void removeAt(int index, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.removeAt(index);
     if (animated) {

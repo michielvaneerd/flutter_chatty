@@ -353,6 +353,34 @@ class _MyAppState extends State<MyApp> {
       body: SafeArea(
         minimum: EdgeInsets.all(12),
         child: ChattyWidget(
+          onItemLongPress: (item) async {
+            final deletetem = await showDialog<bool?>(
+              context: context,
+              builder: (context) => AlertDialog(
+                content: Text('Delete this item?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text('Delete'),
+                  ),
+                ],
+              ),
+            );
+            if (deletetem != null && deletetem) {
+              controller.remove(item);
+            }
+          },
+          // onItemTap: (item) {
+          //   print('Item ${item.content} was tapped!');
+          // },
           animationTransition: (item, animation) {
             return getAnimationByAnimation(item, animation);
           },
