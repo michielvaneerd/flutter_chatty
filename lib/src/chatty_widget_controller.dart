@@ -52,6 +52,10 @@ class ChattyWidgetController {
     }
   }
 
+  void add(ChattyItem item, {bool withNotify = true}) {
+    insertAt(0, item, withNotify: withNotify);
+  }
+
   void insertAt(int index, ChattyItem item, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.insert(index, item);
     if (animated) {
@@ -65,11 +69,11 @@ class ChattyWidgetController {
   void remove(ChattyItem item, {bool withNotify = true}) {
     final index = _notifier.chattyWidgetState.items.indexOf(item);
     if (index != -1) {
-      removeAt(index, withNotify: withNotify);
+      _removeAt(index, withNotify: withNotify);
     }
   }
 
-  void removeAt(int index, {bool withNotify = true}) {
+  void _removeAt(int index, {bool withNotify = true}) {
     _notifier.chattyWidgetState.items.removeAt(index);
     if (animated) {
       getAnimatedListKey().currentState?.removeItem(
