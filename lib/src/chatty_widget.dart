@@ -138,7 +138,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     }
 
     // Add the user answer to the items
-    _controller.insertAt(0, ChattyItem.fromUser(prompt));
+    _controller.add(ChattyItem.fromUser(prompt));
 
     // Add some random delay between adding the user prompt and the assistant "thinking" bubble,
     // that way it looks more natural and we can first see the user prompt appear and then the assistant "thinking" bubble.
@@ -148,7 +148,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
       await answer!.actionBefore!();
     }
 
-    _controller.insertAt(0, ChattyItem.fromAssistant(''));
+    _controller.add(ChattyItem.fromAssistant(''));
 
     // await Future.delayed(Duration(seconds: 2));
 
