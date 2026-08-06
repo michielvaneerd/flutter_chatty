@@ -282,6 +282,25 @@ ChattyWidget(
 );
 ```
 
+### Custom Extra Widgets
+
+Change the style of any chat item:
+
+```dart
+ChattyWidget(
+  onPrompt: onPrompt,
+  onItemStyle: (item) {
+    if (item.source == ChattyItemSource.assistant && item.createdAt.compareTo(DateTime.now()) > 0) {
+      return myCurrentChattyStyle.copyWith(
+        borderWidth: 10,
+        assistantBorderColor: Colors.blue,
+      );
+    }
+    return null;
+  },
+);
+```
+
 ## API Reference
 
 ### ChattyWidget
@@ -303,6 +322,7 @@ ChattyWidget(
 | `enterDateString` | `String` | Label for date picker button. Default: `'Enter date'`. |
 | `onDocumentClicked` | `void Function(ChattyDocument)?` | Callback when a document is tapped. |
 | `onItemExtraWidget` | `Widget? Function(ChattyItem)?` | Custom widget builder per item. |
+| `onItemStyle` | `ChattyWidgetStyle? Function(ChattyItem)?` | Custom ChattyWidgetStyle builder per item. |
 
 ### ChattyItem
 
