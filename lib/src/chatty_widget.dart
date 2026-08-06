@@ -22,6 +22,7 @@ class ChattyWidget extends StatefulWidget {
     this.style = const ChattyWidgetStyle(),
     this.controller,
     this.onItemExtraWidget,
+    this.onItemStyle,
     this.animationTransition,
     this.onItemLongPress,
     this.onItemTap,
@@ -41,6 +42,9 @@ class ChattyWidget extends StatefulWidget {
 
   /// Callback that is called for each chat item and can be used to return a custom extra widget to display.
   final Widget? Function(ChattyItem item)? onItemExtraWidget;
+
+  /// Callback that is called for each chat item and can be used to return a ChattyWidgetStyle that will override the one from the ChattyWidget
+  final ChattyWidgetStyle? Function(ChattyItem item)? onItemStyle;
 
   /// Required callback that is called when the user enters a new prompt and optionaly a value of an answer.
   /// This is the place to send this prompt to the LLM and returns the response as a ChattyItem.
@@ -181,7 +185,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
           : null;
       return ChattyItemWidget(
         item: item,
-        style: widget.style,
+        style: widget.onItemStyle != null
+            ? (widget.onItemStyle!(item) ?? widget.style)
+            : widget.style,
         onPrompt: prompt,
         documentsString: widget.documentsString,
         enterDateString: widget.enterDateString,

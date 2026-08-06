@@ -399,6 +399,15 @@ class _MyAppState extends State<MyApp> {
             }
             return null;
           },
+          onItemStyle: (item) {
+            if (item == itemWithExtraWidget) {
+              return getStyleByStyles().copyWith(
+                borderWidth: 10,
+                userBorderColor: Colors.blue,
+                assistantBorderColor: Colors.blue,
+              );
+            }
+          },
           style: getStyleByStyles(),
           // themeData: ThemeData(
           //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),

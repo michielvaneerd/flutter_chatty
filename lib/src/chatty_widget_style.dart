@@ -71,4 +71,34 @@ class ChattyWidgetStyle {
     this.userBorderColor,
     this.assistantBorderColor,
   });
+
+  ChattyWidgetStyle copyWith({
+    TextStyle? userTextStyle,
+    TextStyle? assistantTextStyle,
+    double? borderWidth,
+    Color? userColor,
+    Color? assistantColor,
+    Color? userBorderColor,
+    Color? assistantBorderColor,
+  }) {
+    return ChattyWidgetStyle(
+      userTextStyle: userTextStyle ?? this.userTextStyle,
+      assistantTextStyle: assistantTextStyle ?? this.assistantTextStyle,
+      borderWidth: borderWidth ?? this.borderWidth,
+      userColor: userColor ?? this.userColor,
+      assistantColor: assistantColor ?? this.assistantColor,
+      userBorderColor: userBorderColor ?? this.userBorderColor,
+      assistantBorderColor: assistantBorderColor ?? this.assistantBorderColor,
+      documentsLinkStyle: documentsLinkStyle,
+      thinkingDotsColor: thinkingDotsColor,
+      answerButtonStyle: answerButtonStyle,
+      documentsStringStyle: documentsStringStyle,
+      timeStyle: timeStyle,
+      dateStyle: dateStyle,
+      dateBoxDecoration: dateBoxDecoration,
+      datePadding: datePadding,
+      userPadding: userPadding,
+      assistantPadding: assistantPadding,
+    );
+  }
 }
