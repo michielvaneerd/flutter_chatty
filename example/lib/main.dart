@@ -406,6 +406,8 @@ class _MyAppState extends State<MyApp> {
                 userBorderColor: Colors.blue,
                 assistantBorderColor: Colors.blue,
               );
+            } else {
+              return null;
             }
           },
           style: getStyleByStyles(),
