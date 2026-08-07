@@ -128,9 +128,12 @@ class ChattyWidgetController {
       withDateSeparator: this.withDateSeparator,
     );
     if (this.animated) {
-      getAnimatedListKey().currentState?.removeAllItems(
-        (context, animation) => SizedBox.shrink(),
-      );
+      // This results in an error.
+      // getAnimatedListKey().currentState?.removeAllItems(
+      //   (context, animation) => SizedBox.shrink(),
+      // );
+      // This is a lesser nice way of clearing the list
+      _animatedListKey = GlobalKey<AnimatedListState>();
       getAnimatedListKey().currentState?.insertAllItems(
         0,
         newChattyWidgetState.initialItemCount,
