@@ -61,6 +61,7 @@ class ChattyQuestion extends Equatable {
 class ChattyItem extends Equatable {
   /// Can contain the following HTML tags: p, b, strong, i, em.
   /// If this is a question, it contains the question content.
+  final int? id;
   final String content;
   final ChattyItemSource source;
   final ChattyQuestion? question;
@@ -73,6 +74,7 @@ class ChattyItem extends Equatable {
   final DateTime createdAt;
 
   const ChattyItem({
+    this.id,
     required this.content,
     required this.source,
     this.question,
@@ -89,8 +91,9 @@ class ChattyItem extends Equatable {
     );
   }
 
-  factory ChattyItem.fromUser(String content, {DateTime? createdAt}) {
+  factory ChattyItem.fromUser(String content, {DateTime? createdAt, int? id}) {
     return ChattyItem(
+      id: id,
       content: content,
       source: ChattyItemSource.user,
       createdAt: createdAt ?? DateTime.now(),
@@ -99,12 +102,14 @@ class ChattyItem extends Equatable {
 
   factory ChattyItem.fromAssistant(
     String content, {
+    int? id,
     String? error,
     DateTime? createdAt,
     ChattyQuestion? question,
     List<ChattyDocument>? documents,
   }) {
     return ChattyItem(
+      id: id,
       content: content,
       error: error,
       source: ChattyItemSource.assistant,
@@ -115,11 +120,13 @@ class ChattyItem extends Equatable {
   }
 
   ChattyItem copyWith({
+    int? id,
     String? content,
     bool removeQuestion = false,
     String? error,
   }) {
     return ChattyItem(
+      id: id ?? this.id,
       content: content ?? this.content,
       source: source,
       error: error ?? this.error,
@@ -136,5 +143,6 @@ class ChattyItem extends Equatable {
     error,
     createdAt,
     documents,
+    id,
   ];
 }

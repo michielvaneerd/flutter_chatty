@@ -86,7 +86,7 @@ final controller = ChattyWidgetController(
   ],
 );
 
-If you don't set a `ChattyWidgetController`, it will be created internally.
+// If you don't set a `ChattyWidgetController`, it will be created internally.
 
 // In your widget tree:
 ChattyWidget(
