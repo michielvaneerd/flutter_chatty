@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum ChattyItemSource { user, assistant, dateSeparator }
 
-enum ChattyQuestionType { none, text, int, email, date, singleChoice }
+enum ChattyQuestionType { none, text, int, email, date, singleChoice, password }
 
 enum ChattyDocumentType { pdf, docx, url }
 
@@ -63,6 +63,7 @@ class ChattyItem extends Equatable {
   /// If this is a question, it contains the question content.
   final int? id;
   final String content;
+  final bool obscureContent;
   final ChattyItemSource source;
   final ChattyQuestion? question;
   final List<ChattyDocument>?
@@ -81,6 +82,7 @@ class ChattyItem extends Equatable {
     this.error,
     this.documents,
     required this.createdAt,
+    this.obscureContent = false,
   });
 
   factory ChattyItem.fromDateSeparator(DateTime createdAt) {
@@ -91,12 +93,18 @@ class ChattyItem extends Equatable {
     );
   }
 
-  factory ChattyItem.fromUser(String content, {DateTime? createdAt, int? id}) {
+  factory ChattyItem.fromUser(
+    String content, {
+    DateTime? createdAt,
+    int? id,
+    bool obscureContent = false,
+  }) {
     return ChattyItem(
       id: id,
       content: content,
       source: ChattyItemSource.user,
       createdAt: createdAt ?? DateTime.now(),
+      obscureContent: obscureContent,
     );
   }
 
@@ -144,5 +152,6 @@ class ChattyItem extends Equatable {
     createdAt,
     documents,
     id,
+    obscureContent,
   ];
 }

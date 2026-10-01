@@ -171,6 +171,15 @@ class _MyAppState extends State<MyApp> {
           ),
         );
       case 3:
+        return ChattyItem.fromAssistant(
+          'What is your password?',
+          question: ChattyQuestion(
+            name: 'pwd',
+            type: ChattyQuestionType.password,
+          ),
+        );
+
+      case 4:
 
         /// Question with input from one of the possible single choice options. Textfield will be disabled.
         return ChattyItem.fromAssistant(
@@ -184,7 +193,8 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         );
-      case 4:
+
+      case 5:
 
         /// The user gave a wrong answer: display question again with the error.
         return ChattyItem.fromAssistant(
@@ -219,7 +229,7 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         );
-      case 5:
+      case 6:
 
         /// Display some documents. Can be used for example in a RAG application to display the sources.
         return ChattyItem.fromAssistant(
@@ -232,7 +242,8 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
         );
-      case 6:
+
+      case 7:
 
         /// Normal response.
         return ChattyItem.fromAssistant(

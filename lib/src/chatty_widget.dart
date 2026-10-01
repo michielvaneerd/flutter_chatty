@@ -142,7 +142,12 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     }
 
     // Add the user answer to the items
-    _controller.add(ChattyItem.fromUser(prompt));
+    _controller.add(
+      ChattyItem.fromUser(
+        prompt,
+        obscureContent: question?.type == ChattyQuestionType.password,
+      ),
+    );
 
     // Add some random delay between adding the user prompt and the assistant "thinking" bubble,
     // that way it looks more natural and we can first see the user prompt appear and then the assistant "thinking" bubble.
@@ -268,12 +273,18 @@ class _ChattyWidgetState extends State<ChattyWidget> {
               fullItems.isNotEmpty &&
               fullItems.first.question != null &&
               ChattyItemWidget.hasEmbeddedInput(fullItems.first.question!.type);
+          final obscureText =
+              !currentItemQuestionHasEmbeddedInput &&
+              fullItems.isNotEmpty &&
+              fullItems.first.question != null &&
+              fullItems.first.question!.type == ChattyQuestionType.password;
           return Column(
             children: [
               Expanded(child: _getListView(fullItems, busy)),
               SizedBox(height: ChattyWidget.paddingDefault),
               TextField(
                 enabled: !currentItemQuestionHasEmbeddedInput,
+                obscureText: obscureText,
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(
