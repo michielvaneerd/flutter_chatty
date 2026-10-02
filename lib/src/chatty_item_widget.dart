@@ -205,7 +205,9 @@ class ChattyItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mainText = item.obscureContent ? '***' : item.content;
+    final mainText = item.obscureContent
+        ? ('*' * item.content.length)
+        : item.content;
     final isAssistant = item.source == ChattyItemSource.assistant;
     final padding = isAssistant ? style.assistantPadding : style.userPadding;
     final userColor =
