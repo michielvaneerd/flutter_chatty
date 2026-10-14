@@ -91,9 +91,12 @@ class ChattyWidget extends StatefulWidget {
 
 class _ChattyWidgetState extends State<ChattyWidget> {
   final promptController = TextEditingController();
+  final focusNode = FocusNode();
 
   // A ChattyWidgetController can be given by the caller or else it will be created here
   late final ChattyWidgetController _controller;
+  var textFieldHasFocus = false;
+  TextInputType lastTextInputType = TextInputType.text;
 
   @override
   void initState() {
@@ -102,12 +105,18 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     } else {
       _controller = widget.controller!;
     }
+    focusNode.addListener(() {
+      setState(() {
+        textFieldHasFocus = focusNode.hasFocus;
+      });
+    });
     super.initState();
   }
 
   @override
   void dispose() {
     promptController.dispose();
+    focusNode.dispose();
     if (widget.controller == null) {
       _controller.dispose();
     }
@@ -116,6 +125,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
+    final previousTextInputType = lastTextInputType;
     _controller.setBusy(true);
 
     ChattyQuestion? question;
@@ -169,6 +179,21 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
     _controller.setBusy(false, withNotify: false);
     _controller.replaceAt(0, response);
+
+    final nextTextInputType =
+        response.question?.type == ChattyQuestionType.email
+        ? TextInputType.emailAddress
+        : TextInputType.text;
+    if (response.question != null &&
+        textFieldHasFocus &&
+        previousTextInputType != nextTextInputType) {
+      focusNode.unfocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          focusNode.requestFocus();
+        }
+      });
+    }
 
     if (answer?.actionAfter != null) {
       await answer!.actionAfter!();
@@ -278,13 +303,24 @@ class _ChattyWidgetState extends State<ChattyWidget> {
               fullItems.isNotEmpty &&
               fullItems.first.question != null &&
               fullItems.first.question!.type == ChattyQuestionType.password;
+          final isEmailInput =
+              !obscureText &&
+              !currentItemQuestionHasEmbeddedInput &&
+              fullItems.isNotEmpty &&
+              fullItems.first.question != null &&
+              fullItems.first.question!.type == ChattyQuestionType.email;
+          lastTextInputType = isEmailInput
+              ? TextInputType.emailAddress
+              : TextInputType.text;
           return Column(
             children: [
               Expanded(child: _getListView(fullItems, busy)),
               SizedBox(height: ChattyWidget.paddingDefault),
               TextField(
+                focusNode: focusNode,
                 enabled: !currentItemQuestionHasEmbeddedInput,
                 obscureText: obscureText,
+                keyboardType: lastTextInputType,
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(

@@ -163,14 +163,30 @@ class _MyAppState extends State<MyApp> {
 
         /// Question with input from a date picker. Textfield will be disabled.
         return ChattyItem.fromAssistant(
-          'Nice to meat you $prompt! What is your birthdate?',
+          'Nice to meat you $prompt! What is your email?',
+          question: ChattyQuestion(
+            name: 'email',
+            type: ChattyQuestionType.email,
+          ),
+        );
+      case 3:
+
+        /// Question with input from a date picker. Textfield will be disabled.
+        return ChattyItem.fromAssistant(
+          'And your age?',
+          question: ChattyQuestion(name: 'age', type: ChattyQuestionType.text),
+        );
+      case 4:
+        return ChattyItem.fromAssistant(
+          'What is your birthdate?',
           question: ChattyQuestion(
             name: 'birthdate',
             type: ChattyQuestionType.date,
             min: DateFormat('y-MM-dd').format(DateTime(now.year - 100)),
           ),
         );
-      case 3:
+
+      case 5:
         return ChattyItem.fromAssistant(
           'What is your password?',
           question: ChattyQuestion(
@@ -179,7 +195,7 @@ class _MyAppState extends State<MyApp> {
           ),
         );
 
-      case 4:
+      case 6:
 
         /// Question with input from one of the possible single choice options. Textfield will be disabled.
         return ChattyItem.fromAssistant(
@@ -194,7 +210,7 @@ class _MyAppState extends State<MyApp> {
           ),
         );
 
-      case 5:
+      case 7:
 
         /// The user gave a wrong answer: display question again with the error.
         return ChattyItem.fromAssistant(
@@ -229,7 +245,7 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         );
-      case 6:
+      case 8:
 
         /// Display some documents. Can be used for example in a RAG application to display the sources.
         return ChattyItem.fromAssistant(
@@ -243,7 +259,7 @@ class _MyAppState extends State<MyApp> {
           ],
         );
 
-      case 7:
+      case 9:
 
         /// Normal response.
         return ChattyItem.fromAssistant(
