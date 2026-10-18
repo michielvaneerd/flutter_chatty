@@ -321,6 +321,9 @@ class _ChattyWidgetState extends State<ChattyWidget> {
                 enabled: !currentItemQuestionHasEmbeddedInput,
                 obscureText: obscureText,
                 keyboardType: lastTextInputType,
+                autofillHints: obscureText
+                    ? [AutofillHints.password]
+                    : (isEmailInput ? [AutofillHints.email] : null),
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(
