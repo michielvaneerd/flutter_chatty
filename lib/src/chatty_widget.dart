@@ -97,6 +97,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   late final ChattyWidgetController _controller;
   var textFieldHasFocus = false;
   TextInputType lastTextInputType = TextInputType.text;
+  bool lastObscureText = false;
 
   @override
   void initState() {
@@ -126,6 +127,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
     final previousTextInputType = lastTextInputType;
+    final previousObscureText = lastObscureText;
     _controller.setBusy(true);
 
     ChattyQuestion? question;
@@ -184,9 +186,12 @@ class _ChattyWidgetState extends State<ChattyWidget> {
         response.question?.type == ChattyQuestionType.email
         ? TextInputType.emailAddress
         : TextInputType.text;
+    final nextObscureText =
+        response.question?.type == ChattyQuestionType.password;
     if (response.question != null &&
         textFieldHasFocus &&
-        previousTextInputType != nextTextInputType) {
+        (previousTextInputType != nextTextInputType ||
+            previousObscureText != nextObscureText)) {
       focusNode.unfocus();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -312,6 +317,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
           lastTextInputType = isEmailInput
               ? TextInputType.emailAddress
               : TextInputType.text;
+          lastObscureText = obscureText;
           return Column(
             children: [
               Expanded(child: _getListView(fullItems, busy)),
