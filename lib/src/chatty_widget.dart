@@ -23,6 +23,8 @@ class ChattyWidget extends StatefulWidget {
     this.okString = 'OK',
     this.passwordString = 'Password',
     this.emailString = 'Email',
+    this.enterPasswordString = 'Enter password',
+    this.enterEmailString = 'Enter email',
     this.style = const ChattyWidgetStyle(),
     this.controller,
     this.onItemExtraWidget,
@@ -86,6 +88,12 @@ class ChattyWidget extends StatefulWidget {
   /// The text for the 'Password' text field label
   final String passwordString;
 
+  /// The text for the 'Enter email' button
+  final String enterEmailString;
+
+  /// The text for the 'Enter password' button
+  final String enterPasswordString;
+
   /// The text for the 'OK' button
   final String okString;
 
@@ -107,14 +115,14 @@ class ChattyWidget extends StatefulWidget {
 
 class _ChattyWidgetState extends State<ChattyWidget> {
   final promptController = TextEditingController();
-  final focusNode = FocusNode();
+  //final focusNode = FocusNode();
 
   // A ChattyWidgetController can be given by the caller or else it will be created here
   late final ChattyWidgetController _controller;
-  var textFieldHasFocus = false;
-  TextInputType lastTextInputType = TextInputType.text;
-  bool lastObscureText = false;
-  String lastInputMode = 'text';
+  //var textFieldHasFocus = false;
+  //TextInputType lastTextInputType = TextInputType.text;
+  //bool lastObscureText = false;
+  //String lastInputMode = 'text';
 
   @override
   void initState() {
@@ -123,18 +131,18 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     } else {
       _controller = widget.controller!;
     }
-    focusNode.addListener(() {
-      setState(() {
-        textFieldHasFocus = focusNode.hasFocus;
-      });
-    });
+    // focusNode.addListener(() {
+    //   setState(() {
+    //     textFieldHasFocus = focusNode.hasFocus;
+    //   });
+    // });
     super.initState();
   }
 
   @override
   void dispose() {
     promptController.dispose();
-    focusNode.dispose();
+    //focusNode.dispose();
     if (widget.controller == null) {
       _controller.dispose();
     }
@@ -143,8 +151,8 @@ class _ChattyWidgetState extends State<ChattyWidget> {
 
   /// Handle new user prompt
   void prompt(String prompt, {String? answerValue}) async {
-    final previousTextInputType = lastTextInputType;
-    final previousObscureText = lastObscureText;
+    // final previousTextInputType = lastTextInputType;
+    // final previousObscureText = lastObscureText;
     _controller.setBusy(true);
 
     ChattyQuestion? question;
@@ -199,25 +207,25 @@ class _ChattyWidgetState extends State<ChattyWidget> {
     _controller.setBusy(false, withNotify: false);
     _controller.replaceAt(0, response);
 
-    final nextTextInputType =
-        response.question?.type == ChattyQuestionType.email
-        ? TextInputType.emailAddress
-        : TextInputType.text;
-    final nextObscureText =
-        response.question?.type == ChattyQuestionType.password;
-    if (response.question != null &&
-        textFieldHasFocus &&
-        (previousTextInputType != nextTextInputType ||
-            previousObscureText != nextObscureText)) {
-      focusNode.unfocus();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        //Future.delayed(Duration(milliseconds: 300), () {
-        if (mounted) {
-          focusNode.requestFocus();
-        }
-        //});
-      });
-    }
+    // final nextTextInputType =
+    //     response.question?.type == ChattyQuestionType.email
+    //     ? TextInputType.emailAddress
+    //     : TextInputType.text;
+    // final nextObscureText =
+    //     response.question?.type == ChattyQuestionType.password;
+    // if (response.question != null &&
+    //     textFieldHasFocus &&
+    //     (previousTextInputType != nextTextInputType ||
+    //         previousObscureText != nextObscureText)) {
+    //   focusNode.unfocus();
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     //Future.delayed(Duration(milliseconds: 300), () {
+    //     if (mounted) {
+    //       focusNode.requestFocus();
+    //     }
+    //     //});
+    //   });
+    // }
 
     if (answer?.actionAfter != null) {
       await answer!.actionAfter!();
@@ -249,6 +257,8 @@ class _ChattyWidgetState extends State<ChattyWidget> {
         okString: widget.okString,
         emailString: widget.emailString,
         passwordString: widget.passwordString,
+        enterEmailString: widget.enterEmailString,
+        enterPasswordString: widget.enterPasswordString,
         assistantPersona: widget.assistantPersona,
         onDocumentClicked: widget.onDocumentClicked,
         withDocuments: widget.withDocuments,
@@ -326,45 +336,45 @@ class _ChattyWidgetState extends State<ChattyWidget> {
               fullItems.isNotEmpty &&
               fullItems.first.question != null &&
               ChattyItemWidget.hasEmbeddedInput(fullItems.first.question!.type);
-          final obscureText =
-              !currentItemQuestionHasEmbeddedInput &&
-              fullItems.isNotEmpty &&
-              fullItems.first.question != null &&
-              fullItems.first.question!.type == ChattyQuestionType.password;
-          final isEmailInput =
-              !obscureText &&
-              !currentItemQuestionHasEmbeddedInput &&
-              fullItems.isNotEmpty &&
-              fullItems.first.question != null &&
-              fullItems.first.question!.type == ChattyQuestionType.email;
-          //String inputMode = 'text';
-          if (!busy) {
-            lastInputMode = obscureText
-                ? 'password'
-                : isEmailInput
-                ? 'email'
-                : 'text';
-          }
+          // final obscureText =
+          //     !currentItemQuestionHasEmbeddedInput &&
+          //     fullItems.isNotEmpty &&
+          //     fullItems.first.question != null &&
+          //     fullItems.first.question!.type == ChattyQuestionType.password;
+          // final isEmailInput =
+          //     !obscureText &&
+          //     !currentItemQuestionHasEmbeddedInput &&
+          //     fullItems.isNotEmpty &&
+          //     fullItems.first.question != null &&
+          //     fullItems.first.question!.type == ChattyQuestionType.email;
+          // //String inputMode = 'text';
+          // if (!busy) {
+          //   lastInputMode = obscureText
+          //       ? 'password'
+          //       : isEmailInput
+          //       ? 'email'
+          //       : 'text';
+          // }
 
-          final effectiveObscureText = lastInputMode == 'password';
-          final effectiveEmailInput = lastInputMode == 'email';
-          lastTextInputType = effectiveEmailInput
-              ? TextInputType.emailAddress
-              : TextInputType.text;
-          lastObscureText = effectiveObscureText;
+          // final effectiveObscureText = lastInputMode == 'password';
+          // final effectiveEmailInput = lastInputMode == 'email';
+          // lastTextInputType = effectiveEmailInput
+          //     ? TextInputType.emailAddress
+          //     : TextInputType.text;
+          // lastObscureText = effectiveObscureText;
           return Column(
             children: [
               Expanded(child: _getListView(fullItems, busy)),
               SizedBox(height: ChattyWidget.paddingDefault),
               TextField(
-                key: ValueKey(lastInputMode),
-                focusNode: focusNode,
+                //key: ValueKey(lastInputMode),
+                //focusNode: focusNode,
                 enabled: !currentItemQuestionHasEmbeddedInput,
-                obscureText: effectiveObscureText,
-                keyboardType: lastTextInputType,
-                autofillHints: effectiveObscureText
-                    ? [AutofillHints.password]
-                    : (effectiveEmailInput ? [AutofillHints.email] : null),
+                //obscureText: effectiveObscureText,
+                //keyboardType: lastTextInputType,
+                // autofillHints: effectiveObscureText
+                //     ? [AutofillHints.password]
+                //     : (effectiveEmailInput ? [AutofillHints.email] : null),
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(

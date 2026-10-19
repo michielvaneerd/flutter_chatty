@@ -187,6 +187,16 @@ class _MyAppState extends State<MyApp> {
           question: ChattyQuestion(name: 'age', type: ChattyQuestionType.text),
         );
       case 5:
+
+        /// Question with input from a date picker. Textfield will be disabled.
+        return ChattyItem.fromAssistant(
+          'And your email?',
+          question: ChattyQuestion(
+            name: 'email',
+            type: ChattyQuestionType.email,
+          ),
+        );
+      case 6:
         return ChattyItem.fromAssistant(
           'What is your birthdate?',
           question: ChattyQuestion(
@@ -196,7 +206,7 @@ class _MyAppState extends State<MyApp> {
           ),
         );
 
-      case 6:
+      case 7:
         return ChattyItem.fromAssistant(
           'What is your password?',
           question: ChattyQuestion(
@@ -205,7 +215,7 @@ class _MyAppState extends State<MyApp> {
           ),
         );
 
-      case 7:
+      case 8:
 
         /// Question with input from one of the possible single choice options. Textfield will be disabled.
         return ChattyItem.fromAssistant(
@@ -220,7 +230,7 @@ class _MyAppState extends State<MyApp> {
           ),
         );
 
-      case 8:
+      case 9:
 
         /// The user gave a wrong answer: display question again with the error.
         return ChattyItem.fromAssistant(
@@ -255,7 +265,7 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         );
-      case 9:
+      case 10:
 
         /// Display some documents. Can be used for example in a RAG application to display the sources.
         return ChattyItem.fromAssistant(
@@ -269,7 +279,7 @@ class _MyAppState extends State<MyApp> {
           ],
         );
 
-      case 10:
+      case 11:
 
         /// Normal response.
         return ChattyItem.fromAssistant(

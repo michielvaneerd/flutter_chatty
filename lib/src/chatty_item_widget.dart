@@ -121,6 +121,8 @@ class ChattyItemWidget extends StatelessWidget {
     required this.okString,
     required this.emailString,
     required this.passwordString,
+    required this.enterEmailString,
+    required this.enterPasswordString,
     this.onLongPress,
     this.onTap,
     this.style = const ChattyWidgetStyle(),
@@ -133,6 +135,8 @@ class ChattyItemWidget extends StatelessWidget {
   final String documentsString;
   final String enterDateString;
   final String enterEmailAndPasswordString;
+  final String enterEmailString;
+  final String enterPasswordString;
   final String okString;
   final String emailString;
   final String passwordString;
@@ -147,6 +151,8 @@ class ChattyItemWidget extends StatelessWidget {
     ChattyQuestionType.date,
     ChattyQuestionType.singleChoice,
     ChattyQuestionType.emailAndPassword,
+    ChattyQuestionType.email,
+    ChattyQuestionType.password,
   ];
 
   static bool hasEmbeddedInput(ChattyQuestionType type) {
@@ -158,6 +164,75 @@ class ChattyItemWidget extends StatelessWidget {
       return null;
     }
     switch (item.question!.type) {
+      case ChattyQuestionType.password:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FilledButton(
+              style: style.answerButtonStyle,
+              onLongPress:
+                  () {}, // Disables the longPress to bubble up to the parent
+              onPressed: () async {
+                final credentials =
+                    await showModalBottomSheet<
+                      ({String email, String password})
+                    >(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      builder: (context) => _EmailAndPasswordInput(
+                        enterEmailString: enterEmailString,
+                        enterPasswordString: enterPasswordString,
+                        chattyQuestionType: item.question!.type,
+                        emailString: emailString,
+                        passwordString: passwordString,
+                        okString: okString,
+                      ),
+                    );
+                if (credentials != null && context.mounted) {
+                  onPrompt(
+                    credentials.password,
+                    answerValue: credentials.password,
+                  );
+                }
+              },
+              child: Text(enterPasswordString),
+            ),
+          ],
+        );
+      case ChattyQuestionType.email:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FilledButton(
+              style: style.answerButtonStyle,
+              onLongPress:
+                  () {}, // Disables the longPress to bubble up to the parent
+              onPressed: () async {
+                final credentials =
+                    await showModalBottomSheet<
+                      ({String email, String password})
+                    >(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      builder: (context) => _EmailAndPasswordInput(
+                        chattyQuestionType: item.question!.type,
+                        enterEmailString: enterEmailString,
+                        enterPasswordString: enterPasswordString,
+                        emailString: emailString,
+                        passwordString: passwordString,
+                        okString: okString,
+                      ),
+                    );
+                if (credentials != null && context.mounted) {
+                  onPrompt(credentials.email, answerValue: credentials.email);
+                }
+              },
+              child: Text(enterEmailString),
+            ),
+          ],
+        );
       case ChattyQuestionType.emailAndPassword:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,6 +250,9 @@ class ChattyItemWidget extends StatelessWidget {
                       isScrollControlled: true,
                       useSafeArea: true,
                       builder: (context) => _EmailAndPasswordInput(
+                        chattyQuestionType: item.question!.type,
+                        enterEmailString: enterEmailString,
+                        enterPasswordString: enterPasswordString,
                         emailString: emailString,
                         passwordString: passwordString,
                         okString: okString,
@@ -474,15 +552,19 @@ class ChattyItemWidget extends StatelessWidget {
 class _EmailAndPasswordInput extends StatefulWidget {
   const _EmailAndPasswordInput({
     required this.emailString,
+    required this.enterEmailString,
+    required this.enterPasswordString,
     required this.okString,
     required this.passwordString,
-    //required this.emailValidationErrorString,
+    required this.chattyQuestionType,
   });
 
   final String okString;
   final String emailString;
   final String passwordString;
-  //final String emailValidationErrorString;
+  final String enterEmailString;
+  final String enterPasswordString;
+  final ChattyQuestionType chattyQuestionType;
 
   @override
   State<_EmailAndPasswordInput> createState() => _EmailAndPasswordInputState();
@@ -504,14 +586,24 @@ class _EmailAndPasswordInputState extends State<_EmailAndPasswordInput> {
     super.dispose();
   }
 
+  bool hasEmail() {
+    return widget.chattyQuestionType == ChattyQuestionType.email ||
+        widget.chattyQuestionType == ChattyQuestionType.emailAndPassword;
+  }
+
+  bool hasPassword() {
+    return widget.chattyQuestionType == ChattyQuestionType.password ||
+        widget.chattyQuestionType == ChattyQuestionType.emailAndPassword;
+  }
+
   void _submit() {
     if (_submitted || !_formKey.currentState!.validate()) {
       return;
     }
     _submitted = true;
     Navigator.of(context).pop((
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
+      email: hasEmail() ? _emailController.text.trim() : '',
+      password: hasPassword() ? _passwordController.text : '',
     ));
   }
 
@@ -530,42 +622,58 @@ class _EmailAndPasswordInputState extends State<_EmailAndPasswordInput> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: ChattyWidget.paddingDefault,
               children: [
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  autofillHints: const [
-                    AutofillHints.username,
-                    AutofillHints.email,
-                  ],
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(labelText: widget.emailString),
-                  onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
-                ),
-                TextFormField(
-                  controller: _passwordController,
-                  focusNode: _passwordFocusNode,
-                  obscureText: _obscurePassword,
-                  autofillHints: const [AutofillHints.password],
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    labelText: widget.passwordString,
-                    suffixIcon: IconButton(
-                      onPressed: () => setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      }),
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+                if (hasEmail())
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [
+                      AutofillHints.username,
+                      AutofillHints.email,
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return widget.enterEmailString;
+                      } else {
+                        return null;
+                      }
+                    },
+                    textInputAction: hasPassword()
+                        ? TextInputAction.next
+                        : TextInputAction.done,
+                    decoration: InputDecoration(labelText: widget.emailString),
+                    onFieldSubmitted: (_) => hasPassword()
+                        ? _passwordFocusNode.requestFocus()
+                        : _submit(),
+                  ),
+                if (hasPassword())
+                  TextFormField(
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    obscureText: _obscurePassword,
+                    autofillHints: const [AutofillHints.password],
+                    textInputAction: TextInputAction.done,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return widget.enterPasswordString;
+                      } else {
+                        return null;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: widget.passwordString,
+                      suffixIcon: IconButton(
+                        onPressed: () => setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        }),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
                       ),
                     ),
+                    onFieldSubmitted: (_) => _submit(),
                   ),
-                  onFieldSubmitted: (_) => _submit(),
-                ),
                 FilledButton(onPressed: _submit, child: Text(widget.okString)),
               ],
             ),

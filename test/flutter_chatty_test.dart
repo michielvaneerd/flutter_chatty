@@ -23,6 +23,8 @@ void main() {
           okString: 'OK',
           emailString: 'Email',
           passwordString: 'Password',
+          enterEmailString: 'Enter email',
+          enterPasswordString: 'Enter password',
           enterEmailAndPasswordString: '',
         ),
       ),
