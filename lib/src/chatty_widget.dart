@@ -98,6 +98,7 @@ class _ChattyWidgetState extends State<ChattyWidget> {
   var textFieldHasFocus = false;
   TextInputType lastTextInputType = TextInputType.text;
   bool lastObscureText = false;
+  String lastInputMode = 'text';
 
   @override
   void initState() {
@@ -194,9 +195,11 @@ class _ChattyWidgetState extends State<ChattyWidget> {
             previousObscureText != nextObscureText)) {
       focusNode.unfocus();
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        //Future.delayed(Duration(milliseconds: 300), () {
         if (mounted) {
           focusNode.requestFocus();
         }
+        //});
       });
     }
 
@@ -314,22 +317,34 @@ class _ChattyWidgetState extends State<ChattyWidget> {
               fullItems.isNotEmpty &&
               fullItems.first.question != null &&
               fullItems.first.question!.type == ChattyQuestionType.email;
-          lastTextInputType = isEmailInput
+          //String inputMode = 'text';
+          if (!busy) {
+            lastInputMode = obscureText
+                ? 'password'
+                : isEmailInput
+                ? 'email'
+                : 'text';
+          }
+
+          final effectiveObscureText = lastInputMode == 'password';
+          final effectiveEmailInput = lastInputMode == 'email';
+          lastTextInputType = effectiveEmailInput
               ? TextInputType.emailAddress
               : TextInputType.text;
-          lastObscureText = obscureText;
+          lastObscureText = effectiveObscureText;
           return Column(
             children: [
               Expanded(child: _getListView(fullItems, busy)),
               SizedBox(height: ChattyWidget.paddingDefault),
               TextField(
+                key: ValueKey(lastInputMode),
                 focusNode: focusNode,
                 enabled: !currentItemQuestionHasEmbeddedInput,
-                obscureText: obscureText,
+                obscureText: effectiveObscureText,
                 keyboardType: lastTextInputType,
-                autofillHints: obscureText
+                autofillHints: effectiveObscureText
                     ? [AutofillHints.password]
-                    : (isEmailInput ? [AutofillHints.email] : null),
+                    : (effectiveEmailInput ? [AutofillHints.email] : null),
                 decoration: InputDecoration(
                   hintText: widget.promptPlaceHolder,
                   suffixIcon: IconButton(
