@@ -163,20 +163,20 @@ class _MyAppState extends State<MyApp> {
 
         /// Question with input from a date picker. Textfield will be disabled.
         return ChattyItem.fromAssistant(
-          'Nice to meat you $prompt! What is your email?',
+          'Nice to meat you $prompt! What is your email and password?',
           question: ChattyQuestion(
-            name: 'email',
-            type: ChattyQuestionType.email,
+            name: 'auth',
+            type: ChattyQuestionType.emailAndPassword,
           ),
         );
       case 3:
 
         /// Question with input from a date picker. Textfield will be disabled.
         return ChattyItem.fromAssistant(
-          'Nice to meat you $prompt! What is your password?',
+          'Nice to meat you $prompt! What is your hobby?',
           question: ChattyQuestion(
-            name: 'pwd',
-            type: ChattyQuestionType.password,
+            name: 'hobby',
+            type: ChattyQuestionType.text,
           ),
         );
       case 4:

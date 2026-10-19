@@ -2,7 +2,16 @@ import 'package:equatable/equatable.dart';
 
 enum ChattyItemSource { user, assistant, dateSeparator }
 
-enum ChattyQuestionType { none, text, int, email, date, singleChoice, password }
+enum ChattyQuestionType {
+  none,
+  text,
+  int,
+  email,
+  date,
+  singleChoice,
+  password,
+  emailAndPassword,
+}
 
 enum ChattyDocumentType { pdf, docx, url }
 

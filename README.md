@@ -72,6 +72,24 @@ Future<ChattyItem> onPrompt(
 
 When this callback is called from an answer to a question, then the `questionName` parameter contains the name of the question and the `answerValue` parameter contains the value of the answer (for single choice questions).
 
+### Email and Password Questions
+
+Use `ChattyQuestionType.emailAndPassword` to display a Login button in the assistant message:
+
+```dart
+ChattyItem.fromAssistant(
+  'Please log in to continue.',
+  question: const ChattyQuestion(
+    name: 'login',
+    type: ChattyQuestionType.emailAndPassword,
+  ),
+);
+```
+
+The button opens a scrollable modal bottom sheet with email and password fields, validation, and a Login button. The chat composer is disabled while this question is active. Dismissing the sheet does not submit an answer.
+
+On submission, `onPrompt` receives the trimmed email as `prompt`, the question name as `questionName`, and a JSON string containing `email` and `password` as `answerValue`. Decode it with `jsonDecode` from `dart:convert` and route it directly to your authentication service. The password is not added to chat history, but it is included in this callback payload: never forward that payload to an LLM or include it in logs. Authentication and authentication-error handling remain the responsibility of your callback.
+
 ### Using a Controller
 
 Use `ChattyWidgetController` to manage chat state externally (e.g., pre-populate with history or clear the conversation):

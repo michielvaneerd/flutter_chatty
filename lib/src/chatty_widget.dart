@@ -19,6 +19,10 @@ class ChattyWidget extends StatefulWidget {
     this.promptTextFieldDisabled = false,
     this.documentsString = 'Sources:',
     this.enterDateString = 'Enter date',
+    this.enterEmailAndPasswordString = 'Enter email and password',
+    this.okString = 'OK',
+    this.passwordString = 'Password',
+    this.emailString = 'Email',
     this.style = const ChattyWidgetStyle(),
     this.controller,
     this.onItemExtraWidget,
@@ -75,6 +79,18 @@ class ChattyWidget extends StatefulWidget {
 
   /// The text for the 'Enter date' button
   final String enterDateString;
+
+  /// The text for the 'Email' text field label
+  final String emailString;
+
+  /// The text for the 'Password' text field label
+  final String passwordString;
+
+  /// The text for the 'OK' button
+  final String okString;
+
+  /// The text for the 'Enter email and password' button
+  final String enterEmailAndPasswordString;
 
   /// The text for the 'Sources' text
   final String documentsString;
@@ -229,6 +245,10 @@ class _ChattyWidgetState extends State<ChattyWidget> {
         onPrompt: prompt,
         documentsString: widget.documentsString,
         enterDateString: widget.enterDateString,
+        enterEmailAndPasswordString: widget.enterEmailAndPasswordString,
+        okString: widget.okString,
+        emailString: widget.emailString,
+        passwordString: widget.passwordString,
         assistantPersona: widget.assistantPersona,
         onDocumentClicked: widget.onDocumentClicked,
         withDocuments: widget.withDocuments,

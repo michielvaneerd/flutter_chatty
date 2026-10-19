@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chatty/src/chatty_rich_text.dart';
 import 'package:flutter_chatty/src/chatty_widget.dart';
@@ -115,6 +117,10 @@ class ChattyItemWidget extends StatelessWidget {
     this.assistantPersona,
     required this.documentsString,
     required this.enterDateString,
+    required this.enterEmailAndPasswordString,
+    required this.okString,
+    required this.emailString,
+    required this.passwordString,
     this.onLongPress,
     this.onTap,
     this.style = const ChattyWidgetStyle(),
@@ -126,6 +132,10 @@ class ChattyItemWidget extends StatelessWidget {
   final Widget? assistantPersona;
   final String documentsString;
   final String enterDateString;
+  final String enterEmailAndPasswordString;
+  final String okString;
+  final String emailString;
+  final String passwordString;
   final ChattyWidgetStyle style;
   final void Function(String prompt, {String? answerValue}) onPrompt;
   final void Function(ChattyItem item)? onLongPress;
@@ -136,6 +146,7 @@ class ChattyItemWidget extends StatelessWidget {
   static const _embeddedInputQuestionTypes = [
     ChattyQuestionType.date,
     ChattyQuestionType.singleChoice,
+    ChattyQuestionType.emailAndPassword,
   ];
 
   static bool hasEmbeddedInput(ChattyQuestionType type) {
@@ -147,6 +158,42 @@ class ChattyItemWidget extends StatelessWidget {
       return null;
     }
     switch (item.question!.type) {
+      case ChattyQuestionType.emailAndPassword:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FilledButton(
+              style: style.answerButtonStyle,
+              onLongPress:
+                  () {}, // Disables the longPress to bubble up to the parent
+              onPressed: () async {
+                final credentials =
+                    await showModalBottomSheet<
+                      ({String email, String password})
+                    >(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      builder: (context) => _EmailAndPasswordInput(
+                        emailString: emailString,
+                        passwordString: passwordString,
+                        okString: okString,
+                      ),
+                    );
+                if (credentials != null && context.mounted) {
+                  onPrompt(
+                    credentials.email,
+                    answerValue: jsonEncode({
+                      'email': credentials.email,
+                      'password': credentials.password,
+                    }),
+                  );
+                }
+              },
+              child: Text(enterEmailAndPasswordString),
+            ),
+          ],
+        );
       case ChattyQuestionType.date:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,6 +466,111 @@ class ChattyItemWidget extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EmailAndPasswordInput extends StatefulWidget {
+  const _EmailAndPasswordInput({
+    required this.emailString,
+    required this.okString,
+    required this.passwordString,
+    //required this.emailValidationErrorString,
+  });
+
+  final String okString;
+  final String emailString;
+  final String passwordString;
+  //final String emailValidationErrorString;
+
+  @override
+  State<_EmailAndPasswordInput> createState() => _EmailAndPasswordInputState();
+}
+
+class _EmailAndPasswordInputState extends State<_EmailAndPasswordInput> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
+  bool _obscurePassword = true;
+  bool _submitted = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_submitted || !_formKey.currentState!.validate()) {
+      return;
+    }
+    _submitted = true;
+    Navigator.of(context).pop((
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(ChattyWidget.paddingBig),
+        child: AutofillGroup(
+          onDisposeAction: AutofillContextAction.cancel,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: ChattyWidget.paddingDefault,
+              children: [
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [
+                    AutofillHints.username,
+                    AutofillHints.email,
+                  ],
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(labelText: widget.emailString),
+                  onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                ),
+                TextFormField(
+                  controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  obscureText: _obscurePassword,
+                  autofillHints: const [AutofillHints.password],
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    labelText: widget.passwordString,
+                    suffixIcon: IconButton(
+                      onPressed: () => setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      }),
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                    ),
+                  ),
+                  onFieldSubmitted: (_) => _submit(),
+                ),
+                FilledButton(onPressed: _submit, child: Text(widget.okString)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
